@@ -1,0 +1,7 @@
+# 项目工程文件
+project/
+
+# 暂时不需要的测试文件
+test/func_test_v0.03/
+test/perf_test_v0.01/
+test/n4ddr/
