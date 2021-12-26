@@ -28,7 +28,7 @@
 `define AHB_BUSY 2'b01
 `define AHB_WAIT_FOR_STALL 2'b11
 
-//specific inst macro definition
+//specific inst macro definition    ----->op_func
 
 `define NOP			6'b000000
 `define AND 		6'b100100

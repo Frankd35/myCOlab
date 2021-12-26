@@ -1,9 +1,10 @@
 `timescale 1ns / 1ps
+`include "defines.vh"
 
 module ALUcontrol(
     input [1:0] aluop,
     input [5:0] funct,  // inst[5:0]
-    output [2:0] alucontrol
+    output [7:0] alucontrol
     );
     
     assign alucontrol = 
@@ -11,11 +12,14 @@ module ALUcontrol(
         (aluop == 2'b01) ? 3'b110 :     // beq
         // for register instructions
         (aluop == 2'b10) ? (
-        (funct == 6'b10_0000) ? 3'b010 : // addition
-        (funct == 6'b10_0010) ? 3'b110 : // subtrction
-        (funct == 6'b10_0100) ? 3'b000 : // logical and
-        (funct == 6'b10_0101) ? 3'b001 : // logical or
-        (funct == 6'b10_1010) ? 3'b111 : // set on less than
-        3'b100              ) 
+        (funct == EXE_AND) ? 3'b010 : 
+        (funct == EXE_OR) ? 3'b110 : 
+        (funct == EXE_XOR) ? 3'b000 : 
+        (funct == EXE_NOR) ? 3'b001 : 
+        (funct == EXE_ANDI) ? 3'b111 : 
+        (funct == EXE_ORI) ? 3'b111 : 
+        (funct == EXE_XORI) ? 3'b111 : 
+        (funct == EXE_LUI) ? 3'b111 : 
+        8'hff             ) 
         : 3'b100;                          // default
 endmodule

@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`include "defines2.vh"
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -23,19 +24,105 @@
 module ALU(
     input [31:0] in0,
     input [31:0] in1,
-    input [2:0] alucontrol,
+    input [7:0] alucontrol,
     output [31:0] out,
     output zero,overflow
     );
     wire [32:0] extra;
     // combinational logic
     assign out = 
-        (alucontrol == 3'b010) ? in0 + in1 : // add
-        (alucontrol == 3'b110) ? in0 - in1 : // sub
-        (alucontrol == 3'b000) ? in0 & in1 : // and
-        (alucontrol == 3'b001) ? in0 | in1 : // or
-        (alucontrol == 3'b111) ? (in0 < in1 ? 1 : 0) : // slt
-        32'hffff_fff0;                                             // default
+        (alucontrol == EXE_AND_OP) ? in0 & in1 :  
+        (alucontrol == EXE_OR_OP) ? in0 | in1 :  
+        (alucontrol == EXE_XOR_OP) ? in0 ^ in1 :  
+        (alucontrol == EXE_NOR_OP) ? in0 ^ in1 :  
+        (alucontrol == EXE_ANDI_OP) ? in0 & in1 :  
+        (alucontrol == EXE_ORI_OP) ? in0 | in1 :  
+        (alucontrol == EXE_XORI_OP) ? in0 ^ in1 :  
+        (alucontrol == EXE_LUI_OP) ? in1 :  
+
+        (alucontrol == EXE_SLL_OP) ? in0 << in1 :  
+        (alucontrol == EXE_SLLV_OP) ? in0 + in1 :  
+        (alucontrol == EXE_SRL_OP) ? in0 + in1 :  
+        (alucontrol == EXE_SRLV_OP) ? in0 + in1 :  
+        (alucontrol == EXE_SRA_OP) ? in0 + in1 :  
+        (alucontrol == EXE_SRAV_OP) ? in0 + in1 :   
+
+        (alucontrol == EXE_MFHI_OP) ? in0 + in1 :  
+        (alucontrol == EXE_MTHI_OP) ? in0 + in1 :  
+        (alucontrol == EXE_MFLO_OP) ? in0 + in1 :  
+        (alucontrol == EXE_MTLO_OP) ? in0 + in1 :  
+
+        (alucontrol == EXE_SLT_OP) ? in0 + in1 :  
+        (alucontrol == EXE_SLTU_OP) ? in0 + in1 :  
+        (alucontrol == EXE_SLTI_OP) ? in0 + in1 :  
+        (alucontrol == EXE_SLTIU_OP) ? in0 + in1 :  
+        (alucontrol == EXE_ADD_OP) ? in0 + in1 :  
+        (alucontrol == EXE_ADDU_OP) ? in0 + in1 :  
+        (alucontrol == EXE_SUB_OP) ? in0 + in1 :  
+        (alucontrol == EXE_SUBU_OP) ? in0 + in1 :  
+        (alucontrol == EXE_ADDI_OP) ? in0 + in1 :  
+        (alucontrol == EXE_ADDIU_OP) ? in0 + in1 :  
+
+        (alucontrol == EXE_MULT_OP) ? in0 + in1 :  
+        (alucontrol == EXE_MULTU_OP) ? in0 + in1 :  
+
+        (alucontrol == EXE_DIV_OP) ? in0 + in1 :  
+        (alucontrol == EXE_DIVU_OP) ? in0 + in1 :  
+
+        (alucontrol == EXE_J_OP) ? in0 + in1 :  
+        (alucontrol == EXE_JAL_OP) ? in0 + in1 :  
+        (alucontrol == EXE_JALR_OP) ? in0 + in1 :  
+        (alucontrol == EXE_JR_OP) ? in0 + in1 : 
+        (alucontrol == EXE_BEQ_OP) ? in0 + in1 :  
+        (alucontrol == EXE_BGEZ_OP) ? in0 + in1 :  
+        (alucontrol == EXE_BGEZAL_OP) ? in0 + in1 :  
+        (alucontrol == EXE_BGTZ_OP) ? in0 + in1 :  
+        (alucontrol == EXE_BLEZ_OP) ? in0 + in1 :  
+        (alucontrol == EXE_BLTZ_OP) ? in0 + in1 :  
+        (alucontrol == EXE_BLTZAL_OP) ? in0 + in1 :  
+        (alucontrol == EXE_BNE_OP) ? in0 + in1 :  
+
+        (alucontrol == EXE_LB_OP) ? in0 + in1 : 
+        (alucontrol == EXE_LBU_OP) ? in0 + in1 : 
+        (alucontrol == EXE_LH_OP) ? in0 + in1 : 
+        (alucontrol == EXE_LHU_OP) ? in0 + in1 : 
+        (alucontrol == EXE_LL_OP) ? in0 + in1 : 
+        (alucontrol == EXE_LW_OP) ? in0 + in1 : 
+        (alucontrol == EXE_LWL_OP) ? in0 + in1 : 
+        (alucontrol == EXE_LWR_OP) ? in0 + in1 : 
+        (alucontrol == EXE_PREF_OP) ? in0 + in1 : 
+        (alucontrol == EXE_SB_OP) ? in0 + in1 : 
+        (alucontrol == EXE_SC_OP) ? in0 + in1 : 
+        (alucontrol == EXE_SH_OP) ? in0 + in1 : 
+        (alucontrol == EXE_SW_OP) ? in0 + in1 : 
+        (alucontrol == EXE_SWL_OP) ? in0 + in1 : 
+        (alucontrol == EXE_SWR_OP) ? in0 + in1 : 
+        (alucontrol == EXE_SYNC_OP) ? in0 + in1 : 
+
+
+        (alucontrol == EXE_MFC0_OP) ? in0 + in1 : 
+        (alucontrol == EXE_MTC0_OP) ? in0 + in1 : 
+
+        (alucontrol == EXE_SYSCALL_OP) ? in0 + in1 : 
+        (alucontrol == EXE_BREAK_OP) ? in0 + in1 : 
+
+        (alucontrol == EXE_TEQ_OP) ? in0 + in1 : 
+        (alucontrol == EXE_TEQI_OP) ? in0 + in1 : 
+        (alucontrol == EXE_TGE_OP) ? in0 + in1 : 
+        (alucontrol == EXE_TGEI_OP) ? in0 + in1 : 
+        (alucontrol == EXE_TGEIU_OP) ? in0 + in1 : 
+        (alucontrol == EXE_TGEU_OP) ? in0 + in1 : 
+        (alucontrol == EXE_TLT_OP) ? in0 + in1 : 
+        (alucontrol == EXE_TLTI_OP) ? in0 + in1 : 
+        (alucontrol == EXE_TLTIU_OP) ? in0 + in1 : 
+        (alucontrol == EXE_TLTU_OP) ? in0 + in1 : 
+        (alucontrol == EXE_TNE_OP) ? in0 + in1 : 
+        (alucontrol == EXE_TNEI_OP) ? in0 + in1 : 
+
+        (alucontrol == EXE_ERET_OP) ? in0 + in1 : 
+
+        (alucontrol == EXE_NOP_OP) ? in0 + in1 : 
+        32'hffff_fff0;                           // default
         
     assign zero = (out == 0) ? 1 : 0;
     assign extra = 
