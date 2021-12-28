@@ -1,5 +1,6 @@
 `timescale 1ns / 1ps
 `include "defines.vh"
+`include "defines2.vh"
 
 module ALUcontrol(
     input [5:0] opcode,
