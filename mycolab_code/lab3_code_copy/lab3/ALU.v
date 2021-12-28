@@ -34,24 +34,29 @@ module ALU(
         (alucontrol == EXE_AND_OP) ? in0 & in1 :  
         (alucontrol == EXE_OR_OP) ? in0 | in1 :  
         (alucontrol == EXE_XOR_OP) ? in0 ^ in1 :  
-        (alucontrol == EXE_NOR_OP) ? in0 ^ in1 :  
+        (alucontrol == EXE_NOR_OP) ? ~(in0 | in1) :  
         (alucontrol == EXE_ANDI_OP) ? in0 & in1 :  
         (alucontrol == EXE_ORI_OP) ? in0 | in1 :  
         (alucontrol == EXE_XORI_OP) ? in0 ^ in1 :  
-        (alucontrol == EXE_LUI_OP) ? in1 :  
+        (alucontrol == EXE_LUI_OP) ? {in1[15:0], in0[15:0]} :   // immediate == in1  
 
-        (alucontrol == EXE_SLL_OP) ? in0 << in1 :  
-        (alucontrol == EXE_SLLV_OP) ? in0 + in1 :  
-        (alucontrol == EXE_SRL_OP) ? in0 + in1 :  
-        (alucontrol == EXE_SRLV_OP) ? in0 + in1 :  
-        (alucontrol == EXE_SRA_OP) ? in0 + in1 :  
-        (alucontrol == EXE_SRAV_OP) ? in0 + in1 :   
+        // in0: reg[rs] / shamt     in1: reg[rt] 
+        // datapath 应该在in0处增加多路选择器，增加后删掉这一条
+        (alucontrol == EXE_SLL_OP) ? in1 << in0 :  
+        (alucontrol == EXE_SLLV_OP) ? in1 << in0 :  
+        (alucontrol == EXE_SRL_OP) ? in1 >>> in0 :  
+        (alucontrol == EXE_SRLV_OP) ? in1 >>> in0 :  
+        (alucontrol == EXE_SRA_OP) ? in1 >> in0 :  
+        (alucontrol == EXE_SRAV_OP) ? in1 >> in0 :   
 
-        (alucontrol == EXE_MFHI_OP) ? in0 + in1 :  
-        (alucontrol == EXE_MTHI_OP) ? in0 + in1 :  
-        (alucontrol == EXE_MFLO_OP) ? in0 + in1 :  
-        (alucontrol == EXE_MTLO_OP) ? in0 + in1 :  
+        // (alucontrol == EXE_MFHI_OP) ? in0 + in1 :  
+        // (alucontrol == EXE_MTHI_OP) ? in0 + in1 :  
+        // (alucontrol == EXE_MFLO_OP) ? in0 + in1 :  
+        // (alucontrol == EXE_MTLO_OP) ? in0 + in1 :  
 
+        // usigned means no OVERFLOW exception
+        // operator +/- </> 实现的是有符号还是无符号，从reg取出来的值被认为是有符号还是无符号的？
+        // 需不需要自己实现有符号/无符号的运算符？
         (alucontrol == EXE_SLT_OP) ? in0 + in1 :  
         (alucontrol == EXE_SLTU_OP) ? in0 + in1 :  
         (alucontrol == EXE_SLTI_OP) ? in0 + in1 :  
@@ -100,28 +105,28 @@ module ALU(
         (alucontrol == EXE_SYNC_OP) ? in0 + in1 : 
 
 
-        (alucontrol == EXE_MFC0_OP) ? in0 + in1 : 
-        (alucontrol == EXE_MTC0_OP) ? in0 + in1 : 
+        // (alucontrol == EXE_MFC0_OP) ? in0 + in1 : 
+        // (alucontrol == EXE_MTC0_OP) ? in0 + in1 : 
 
-        (alucontrol == EXE_SYSCALL_OP) ? in0 + in1 : 
-        (alucontrol == EXE_BREAK_OP) ? in0 + in1 : 
+        // (alucontrol == EXE_SYSCALL_OP) ? in0 + in1 : 
+        // (alucontrol == EXE_BREAK_OP) ? in0 + in1 : 
 
-        (alucontrol == EXE_TEQ_OP) ? in0 + in1 : 
-        (alucontrol == EXE_TEQI_OP) ? in0 + in1 : 
-        (alucontrol == EXE_TGE_OP) ? in0 + in1 : 
-        (alucontrol == EXE_TGEI_OP) ? in0 + in1 : 
-        (alucontrol == EXE_TGEIU_OP) ? in0 + in1 : 
-        (alucontrol == EXE_TGEU_OP) ? in0 + in1 : 
-        (alucontrol == EXE_TLT_OP) ? in0 + in1 : 
-        (alucontrol == EXE_TLTI_OP) ? in0 + in1 : 
-        (alucontrol == EXE_TLTIU_OP) ? in0 + in1 : 
-        (alucontrol == EXE_TLTU_OP) ? in0 + in1 : 
-        (alucontrol == EXE_TNE_OP) ? in0 + in1 : 
-        (alucontrol == EXE_TNEI_OP) ? in0 + in1 : 
+        // (alucontrol == EXE_TEQ_OP) ? in0 + in1 : 
+        // (alucontrol == EXE_TEQI_OP) ? in0 + in1 : 
+        // (alucontrol == EXE_TGE_OP) ? in0 + in1 : 
+        // (alucontrol == EXE_TGEI_OP) ? in0 + in1 : 
+        // (alucontrol == EXE_TGEIU_OP) ? in0 + in1 : 
+        // (alucontrol == EXE_TGEU_OP) ? in0 + in1 : 
+        // (alucontrol == EXE_TLT_OP) ? in0 + in1 : 
+        // (alucontrol == EXE_TLTI_OP) ? in0 + in1 : 
+        // (alucontrol == EXE_TLTIU_OP) ? in0 + in1 : 
+        // (alucontrol == EXE_TLTU_OP) ? in0 + in1 : 
+        // (alucontrol == EXE_TNE_OP) ? in0 + in1 : 
+        // (alucontrol == EXE_TNEI_OP) ? in0 + in1 : 
 
-        (alucontrol == EXE_ERET_OP) ? in0 + in1 : 
+//      (alucontrol == EXE_ERET_OP) ? in0 + in1 : 
 
-        (alucontrol == EXE_NOP_OP) ? in0 + in1 : 
+//      (alucontrol == EXE_NOP_OP) ? in0 + in1 : 
         32'hffff_fff0;                           // default
         
     assign zero = (out == 0) ? 1 : 0;
