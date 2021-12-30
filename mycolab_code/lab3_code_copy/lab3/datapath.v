@@ -45,6 +45,7 @@ module datapath(
     
     regfile register(
     .clk(clk),
+    .rst(rst),
 	.we3(RegWrite),
 	.ra1(inst[25:21]),
 	.ra2(inst[20:16]),

@@ -37,9 +37,9 @@ module ALU(
         (alucontrol == `EXE_OR_OP) ? in0 | in1 :      
         (alucontrol == `EXE_XOR_OP) ? in0 ^ in1 :     
         (alucontrol == `EXE_NOR_OP) ? ~(in0 | in1) :  
-        (alucontrol == `EXE_ANDI_OP) ? in0 & in1 :
-        (alucontrol == `EXE_ORI_OP) ? in0 | in1 :
-        (alucontrol == `EXE_XORI_OP) ? in0 ^ in1 :
+        (alucontrol == `EXE_ANDI_OP) ? in0 & {16'b0, in1[15:0]} :
+        (alucontrol == `EXE_ORI_OP) ? in0 | {16'b0, in1[15:0]} :
+        (alucontrol == `EXE_XORI_OP) ? in0 ^ {16'b0, in1[15:0]} :
         (alucontrol == `EXE_LUI_OP) ? {in1[15:0], in0[15:0]} :   // immediate == in1
 
         // in0: reg[rs] / shamt     in1: reg[rt]
@@ -112,7 +112,7 @@ module ALU(
     // double signed bit
     assign extra = 
     ((alucontrol == `ADD) | (alucontrol == `ADDI)) ? {in0[31],in0} + {in1[31],in1} : 
-    (lucontrol == `SUB)? {in0[31],in0} - {in1[31],in1} :
+    (alucontrol == `SUB)? {in0[31],in0} - {in1[31],in1} :
     0;
     
     assign overflow = extra[31] ^ extra[32];

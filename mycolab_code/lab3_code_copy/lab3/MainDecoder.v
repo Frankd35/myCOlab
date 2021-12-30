@@ -25,7 +25,7 @@ module MainDecoder(
     output RegWrite, MemWrite, MemRead,RegDst, ALUsrc, Mem2Reg, Beq, Jump
     );
     
-    wire [0:9] control;
+    wire [0:7] control;
     assign RegDst = control[0];
     assign ALUsrc = control[1];
     assign Mem2Reg = control[2];
@@ -34,17 +34,16 @@ module MainDecoder(
     assign MemRead = control[5];
     assign RegWrite = control[6];    
     assign Jump = control[7];
-    assign aluop = control[8:9];
     
     // combinational logic
     assign control = 
     // R type instruction
-    (opcode == 6'b00_0000) ? 10'b1000_0010_10 : // R type
-    (opcode == 6'b00_1000) ? 10'b0100_0010_00 : // addi
-    (opcode == 6'b10_1011) ? 10'b0100_1000_00 : // sw
-    (opcode == 6'b10_0011) ? 10'b0110_0110_00 : // lw
-    (opcode == 6'b00_0100) ? 10'b0001_0000_01 : // beq
-    (opcode == 6'b00_0010) ? 10'b0000_0001_00 : // jump
+    (opcode == 6'b00_0000) ? 8'b1000_0010 : // R-type
+    (opcode[5:3] == 3'b001) ? 8'b0100_0010 : // I-tyoe
+    (opcode == 6'b10_1011) ? 8'b0100_1000 : // sw
+    (opcode == 6'b10_0011) ? 8'b0110_0110 : // lw
+    (opcode == 6'b00_0100) ? 8'b0001_0000 : // beq
+    (opcode == 6'b00_0010) ? 8'b0000_0001 : // jump
     0;                                          // default
     
 endmodule
