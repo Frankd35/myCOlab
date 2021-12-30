@@ -68,10 +68,10 @@
 `define DIV  6'b011010
 `define DIVU  6'b011011
 
+`define JR  6'b001000       // R-type
+`define JALR  6'b001001     // R-type
 `define J  6'b000010
 `define JAL  6'b000011
-`define JALR  6'b001001
-`define JR  6'b001000
 `define BEQ  6'b000100
 `define BGEZ  5'b00001
 `define BGEZAL  5'b10001

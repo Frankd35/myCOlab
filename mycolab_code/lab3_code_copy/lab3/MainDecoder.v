@@ -22,8 +22,7 @@
 
 module MainDecoder(
     input [5:0] opcode,     // inst[31:26]
-    output RegWrite, MemWrite, MemRead,RegDst, ALUsrc, Mem2Reg, Beq, Jump,
-    output [1:0] aluop
+    output RegWrite, MemWrite, MemRead,RegDst, ALUsrc, Mem2Reg, Beq, Jump
     );
     
     wire [0:9] control;

@@ -51,13 +51,13 @@ module top(
 	//inst_mem imem(clk,pc[7:2],instr);
 	//data_mem dmem(clk,memwrite,dataadr,writedata,readdata);
 	
-	im instruction_memory(
+	instruction_memory im (
     .clka(clk),    // input wire clka
     .addra(pc),  // input wire [31 : 0] addra
     .douta(instr)  // output wire [31 : 0] douta
     );
 
-    dm data_memory(
+    data_memory dm (
     .clka(clk),    // input wire clka
     .wea(memwrite),      // input wire [0 : 0] wea
     .addra(dataadr),  // input wire [31 : 0] addra

@@ -9,70 +9,84 @@ module ALUcontrol(
     );
     
     assign alucontrol = 
+        // R-type
+        (opcode == 6'b00_0000) ? (
+        // -------------    trap instructions decode here!    ------------
+        // unfinished
+
         // logic
-        ((`EXE_AND == opcode) && (`AND == funct)) ? `EXE_AND_OP :
-        ((`EXE_OR == opcode) && (`OR == funct)) ? `EXE_OR_OP :
-        ((`EXE_XOR == opcode) && (`XOR == funct)) ? `EXE_XOR_OP :
-        ((`EXE_NOR == opcode) && (`NOR == funct)) ? `EXE_NOR_OP :
-        ((`EXE_ANDI == opcode) && (`ANDI == funct)) ? `EXE_ANDI_OP :
-        ((`EXE_ORI == opcode) && (`ORI == funct)) ? `EXE_ORI_OP :
-        ((`EXE_XORI == opcode) && (`XORI == funct)) ? `EXE_XORI_OP :
-        ((`EXE_LUI == opcode) && (`LUI == funct)) ? `EXE_LUI_OP :
+        (`AND == funct) ? `EXE_AND_OP :
+        (`OR == funct) ? `EXE_OR_OP :
+        (`XOR == funct) ? `EXE_XOR_OP :
+        (`NOR == funct) ? `EXE_NOR_OP :
         
         // shift
-        ((`EXE_SLL == opcode) && (`SLL == funct)) ? `EXE_SLL_OP :
-        ((`EXE_SLLV == opcode) && (`SLLV == funct)) ? `EXE_SLLV_OP :
-        ((`EXE_SRL == opcode) && (`SRL == funct)) ? `EXE_SRL_OP :
-        ((`EXE_SRLV == opcode) && (`SRLV == funct)) ? `EXE_SRLV_OP :
-        ((`EXE_SRA == opcode) && (`SRA == funct)) ? `EXE_SRA_OP :
-        ((`EXE_SRAV == opcode) && (`SRAV == funct)) ? `EXE_SRAV_OP :
+        (`SLL == funct) ? `EXE_SLL_OP :
+        (`SLLV == funct) ? `EXE_SLLV_OP :
+        (`SRL == funct) ? `EXE_SRL_OP :
+        (`SRLV == funct) ? `EXE_SRLV_OP :
+        (`SRA == funct) ? `EXE_SRA_OP :
+        (`SRAV == funct) ? `EXE_SRAV_OP :
         
         // move
-        // unused
-        ((`EXE_MFHI == opcode) && (`MFHI == funct)) ? `EXE_MFHI_OP :
-        ((`EXE_MTHI == opcode) && (`MTHI == funct)) ? `EXE_MTHI_OP :
-        ((`EXE_MFLO == opcode) && (`MFLO == funct)) ? `EXE_MFLO_OP :
-        ((`EXE_MTLO == opcode) && (`MTLO == funct)) ? `EXE_MTLO_OP :
+        (`MFHI == funct) ? `EXE_MFHI_OP :
+        (`MTHI == funct) ? `EXE_MTHI_OP :
+        (`MFLO == funct) ? `EXE_MFLO_OP :
+        (`MTLO == funct) ? `EXE_MTLO_OP :
         
         // arithmetic
-        ((`EXE_SLT == opcode) && (`SLT == funct)) ? `EXE_SLT_OP :
-        ((`EXE_SLTU == opcode) && (`SLTU == funct)) ? `EXE_SLTU_OP :
-        ((`EXE_SLTI == opcode) && (`SLTI == funct)) ? `EXE_SLTI_OP :
-        ((`EXE_SLTIU == opcode) && (`SLTIU == funct)) ? `EXE_SLTIU_OP :
-        ((`EXE_ADD == opcode) && (`ADD == funct)) ? `EXE_ADD_OP :
-        ((`EXE_ADDU == opcode) && (`ADDU == funct)) ? `EXE_ADDU_OP :
-        ((`EXE_SUB == opcode) && (`SUB == funct)) ? `EXE_SUB_OP :
-        ((`EXE_SUBU == opcode) && (`SUBU == funct)) ? `EXE_SUBU_OP :
-        ((`EXE_ADDI == opcode) && (`ADDI == funct)) ? `EXE_ADDI_OP :
-        ((`EXE_ADDIU == opcode) && (`ADDIU == funct)) ? `EXE_ADDIU_OP :
+        (`SLT == funct) ? `EXE_SLT_OP :
+        (`SLTU == funct) ? `EXE_SLTU_OP :
+        (`ADD == funct) ? `EXE_ADD_OP :
+        (`ADDU == funct) ? `EXE_ADDU_OP :
+        (`SUB == funct) ? `EXE_SUB_OP :
+        (`SUBU == funct) ? `EXE_SUBU_OP :
         
-        ((`EXE_MULT == opcode) && (`MULT == funct)) ? `EXE_MULT_OP :
-        ((`EXE_MULTU == opcode) && (`MULTU == funct)) ? `EXE_MULTU_OP :
-        ((`EXE_DIV == opcode) && (`DIV == funct)) ? `EXE_DIV_OP :
-        ((`EXE_DIVU == opcode) && (`DIVU == funct)) ? `EXE_DIVU_OP :
+        // move
+        (`MULT == funct) ? `EXE_MULT_OP :
+        (`MULTU == funct) ? `EXE_MULTU_OP :
+        (`DIV == funct) ? `EXE_DIV_OP :
+        (`DIVU == funct) ? `EXE_DIVU_OP :
         
-        // j-type
-        ((`EXE_J == opcode) && (`J == funct)) ? `EXE_J_OP :
-        ((`EXE_JAL == opcode) && (`JAL == funct)) ? `EXE_JAL_OP :
-        ((`EXE_JALR == opcode) && (`JALR == funct)) ? `EXE_JALR_OP :
-        ((`EXE_JR == opcode) && (`JR == funct)) ? `EXE_JR_OP :
-        ((`EXE_BEQ == opcode) && (`BEQ == funct)) ? `EXE_BEQ_OP :
-        ((`EXE_BGEZ == opcode) && (`BGEZ == funct)) ? `EXE_BGEZ_OP :
-        ((`EXE_BGEZAL == opcode) && (`BGEZAL == funct)) ? `EXE_BGEZAL_OP :
-        ((`EXE_BGTZ == opcode) && (`BGTZ == funct)) ? `EXE_BGTZ_OP :
-        ((`EXE_BLEZ == opcode) && (`BLEZ == funct)) ? `EXE_BLEZ_OP :
-        ((`EXE_BLTZ == opcode) && (`BLTZ == funct)) ? `EXE_BLTZ_OP :
-        ((`EXE_BLTZAL == opcode) && (`BLTZAL == funct)) ? `EXE_BLTZAL_OP :
-        ((`EXE_BNE == opcode) && (`BNE == funct)) ? `EXE_BNE_OP :
+        // jump into register target
+        (`JR == funct) ? `EXE_JR_OP :
+        (`JALR == funct) ? `EXE_JALR_OP :
+        0'hff       // default  
+        ) :
+        
+        // logic immediate 
+        (`ANDI == opcode) ? `EXE_ANDI_OP :
+        (`ORI == opcode) ? `EXE_ORI_OP :  
+        (`XORI == opcode) ? `EXE_XORI_OP :
+        (`LUI == opcode) ? `EXE_LUI_OP :  
+
+        // arithmetic immediate
+        (`SLTI == opcode) ? `EXE_SLTI_OP :
+        (`SLTIU == opcode) ? `EXE_SLTIU_OP :
+        (`ADDI == opcode) ? `EXE_ADDI_OP :
+        (`ADDIU == opcode) ? `EXE_ADDIU_OP :
+
+        // J-type
+        (`J == opcode) ? `EXE_J_OP :
+        (`JAL == opcode) ? `EXE_JAL_OP :
+        (`BEQ == opcode) ? `EXE_BEQ_OP :
+        (`BGEZ == opcode) ? `EXE_BGEZ_OP :
+        (`BGTZ == opcode) ? `EXE_BGTZ_OP :
+        // (`BLEZ == opcode) ? `EXE_BLEZ_OP :       these fucking inst has same opcode and  
+        // (`BLTZ == opcode) ? `EXE_BLTZ_OP :       different rt field,
+        // (`BGEZAL == opcode) ? `EXE_BGEZAL_OP :   figure it out before add em into datapath
+        // (`BLTZAL == opcode) ? `EXE_BLTZAL_OP :
+        (`BNE == opcode) ? `EXE_BNE_OP :
         
         // load & store
-        ((`EXE_LB == opcode) && (`LB == funct)) ? `EXE_LB_OP :
-        ((`EXE_LBU == opcode) && (`LBU == funct)) ? `EXE_LBU_OP :
-        ((`EXE_LH == opcode) && (`LH == funct)) ? `EXE_LH_OP :
-        ((`EXE_LHU == opcode) && (`LHU == funct)) ? `EXE_LHU_OP :
-        ((`EXE_LW == opcode) && (`LW == funct)) ? `EXE_LW_OP :
-        ((`EXE_SB == opcode) && (`SB == funct)) ? `EXE_SB_OP :
-        ((`EXE_SH == opcode) && (`SH == funct)) ? `EXE_SH_OP :
-        ((`EXE_SW == opcode) && (`SW == funct)) ? `EXE_SW_OP :
+        (`LB == opcode) ? `EXE_LB_OP :
+        (`LBU == opcode) ? `EXE_LBU_OP :
+        (`LH == opcode) ? `EXE_LH_OP :
+        (`LHU == opcode) ? `EXE_LHU_OP :
+        (`LW == opcode) ? `EXE_LW_OP :
+        (`SB == opcode) ? `EXE_SB_OP :
+        (`SH == opcode) ? `EXE_SH_OP :
+        (`SW == opcode) ? `EXE_SW_OP :        
+
         8'hff;                          // default
 endmodule

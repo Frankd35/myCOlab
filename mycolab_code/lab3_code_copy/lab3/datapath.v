@@ -22,7 +22,7 @@
 
 module datapath(
     input clk,rst,Mem2Reg,PCsrc,ALUsrc,RegDst,RegWrite,Jump,    // control signals 
-    input [2:0] alucontrol, // control signals 
+    input [7:0] alucontrol, // control signals 
     output overflow,zero,   // ALU output signal
     output [31:0] PCout,    // instruction address
     input [31:0] inst,     // instruction
@@ -67,7 +67,7 @@ module datapath(
     
     PC pc(
     .clk(clk),
-    .rst(rst),  // Í¬²½¸´Î»
+    .rst(rst),  
     .inst_addr(PCin),
     .addr(PCout)
     );
