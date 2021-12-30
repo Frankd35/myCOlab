@@ -30,6 +30,7 @@ module ALU(
     output zero,overflow
     );
     wire [32:0] extra;
+
     // combinational logic
     assign out = 
         (alucontrol == `EXE_AND_OP) ? in0 & in1 :     
@@ -57,23 +58,23 @@ module ALU(
         // usigned means no OVERFLOW exception
         // operator +/- </> 实现的是有符号还是无符号，从reg取出来的值被认为是有符号还是无符号的？
         // 需不需要自己实现有符号/无符号的运算符？
-        (alucontrol == `EXE_SLT_OP) ? (in0 < in1) :
-        (alucontrol == `EXE_SLTU_OP) ? in0 + in1 :
-        (alucontrol == `EXE_SLTI_OP) ? in0 + in1 :
-        (alucontrol == `EXE_SLTIU_OP) ? in0 + in1 :
+        (alucontrol == `EXE_SLT_OP) ? (($signed(in0) < $signed(in1))) :
+        (alucontrol == `EXE_SLTU_OP) ? (in0 < in1) :
+        (alucontrol == `EXE_SLTI_OP) ? (($signed(in0) < $signed(in1))) :
+        (alucontrol == `EXE_SLTIU_OP) ? (in0 < in1) :
         (alucontrol == `EXE_ADD_OP) ? in0 + in1 :
         (alucontrol == `EXE_ADDU_OP) ? in0 + in1 :
         (alucontrol == `EXE_SUB_OP) ? in0 - in1 :
-        (alucontrol == `EXE_SUBU_OP) ? in0 + in1 :
+        (alucontrol == `EXE_SUBU_OP) ? in0 - in1 :
         (alucontrol == `EXE_ADDI_OP) ? in0 + in1 :
         (alucontrol == `EXE_ADDIU_OP) ? in0 + in1 :
 
         // 未实现
-        (alucontrol == `EXE_MULT_OP) ? in0 + in1 :
-        (alucontrol == `EXE_MULTU_OP) ? in0 + in1 :
+        // (alucontrol == `EXE_MULT_OP) ? in0 + in1 :
+        // (alucontrol == `EXE_MULTU_OP) ? in0 + in1 :
 
-        (alucontrol == `EXE_DIV_OP) ? in0 + in1 :
-        (alucontrol == `EXE_DIVU_OP) ? in0 + in1 :
+        // (alucontrol == `EXE_DIV_OP) ? in0 + in1 :
+        // (alucontrol == `EXE_DIVU_OP) ? in0 + in1 :
 
         (alucontrol == `EXE_J_OP) ? in0 + in1 :
         (alucontrol == `EXE_JAL_OP) ? in0 + in1 :
@@ -107,9 +108,11 @@ module ALU(
         32'hffff_fff0;                           // default
         
     assign zero = (out == 0) ? 1 : 0;
+
+    // double signed bit
     assign extra = 
-    (alucontrol == 3'b010) ? {in0[31],in0} + {in1[31],in1} : 
-    (alucontrol == 3'b110) ? {in0[31],in0} - {in1[31],in1} :
+    ((alucontrol == `ADD) | (alucontrol == `ADDI)) ? {in0[31],in0} + {in1[31],in1} : 
+    (lucontrol == `SUB)? {in0[31],in0} - {in1[31],in1} :
     0;
     
     assign overflow = extra[31] ^ extra[32];
