@@ -45,10 +45,10 @@ module ALU(
         // in0: reg[rs] / shamt     in1: reg[rt]
         (alucontrol == `EXE_SLL_OP) ? in1 << in0 :
         (alucontrol == `EXE_SLLV_OP) ? in1 << in0 :
-        (alucontrol == `EXE_SRL_OP) ? in1 >>> in0 :
-        (alucontrol == `EXE_SRLV_OP) ? in1 >>> in0 :
-        (alucontrol == `EXE_SRA_OP) ? in1 >> in0 :
-        (alucontrol == `EXE_SRAV_OP) ? in1 >> in0 :
+        (alucontrol == `EXE_SRL_OP) ? in1 >> in0 :
+        (alucontrol == `EXE_SRLV_OP) ? in1 >> in0 :
+        (alucontrol == `EXE_SRA_OP) ? (in1 >> in0) | {{16{in1[31]}},16'h0000} :     // bit mask
+        (alucontrol == `EXE_SRAV_OP) ? (in1 >> in0) | {{16{in1[31]}},16'h0000} :
 
         // (alucontrol == `EXE_MFHI_OP) ? in0 + in1 :
         // (alucontrol == `EXE_MTHI_OP) ? in0 + in1 :
@@ -58,9 +58,9 @@ module ALU(
         // usigned means no OVERFLOW exception
         // operator +/- </> 实现的是有符号还是无符号，从reg取出来的值被认为是有符号还是无符号的？
         // 需不需要自己实现有符号/无符号的运算符？
-        (alucontrol == `EXE_SLT_OP) ? (($signed(in0) < $signed(in1))) :
+        (alucontrol == `EXE_SLT_OP) ? ($signed(in0) < $signed(in1)) :
         (alucontrol == `EXE_SLTU_OP) ? (in0 < in1) :
-        (alucontrol == `EXE_SLTI_OP) ? (($signed(in0) < $signed(in1))) :
+        (alucontrol == `EXE_SLTI_OP) ? ($signed(in0) < $signed(in1)) :
         (alucontrol == `EXE_SLTIU_OP) ? (in0 < in1) :
         (alucontrol == `EXE_ADD_OP) ? in0 + in1 :
         (alucontrol == `EXE_ADDU_OP) ? in0 + in1 :
