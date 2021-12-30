@@ -42,7 +42,6 @@ module ALU(
         (alucontrol == `EXE_LUI_OP) ? {in1[15:0], in0[15:0]} :   // immediate == in1
 
         // in0: reg[rs] / shamt     in1: reg[rt]
-        // datapath 应该在in0处增加多路选择器，增加后删掉这一条
         (alucontrol == `EXE_SLL_OP) ? in1 << in0 :
         (alucontrol == `EXE_SLLV_OP) ? in1 << in0 :
         (alucontrol == `EXE_SRL_OP) ? in1 >>> in0 :
