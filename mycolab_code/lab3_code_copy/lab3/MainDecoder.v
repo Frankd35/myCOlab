@@ -21,8 +21,8 @@
 
 
 module MainDecoder(
-    input [5:0] opcode,     // inst[31:26]
-    output RegWrite, MemWrite, MemRead,RegDst, ALUsrc, Mem2Reg, Beq, Jump
+    input [5:0] opcode, funct,
+    output RegWrite, MemWrite, MemRead,RegDst, ALUsrc, Mem2Reg, Beq, Jump, JumpV, Link
     );
     
     wire [0:7] control;
@@ -38,12 +38,19 @@ module MainDecoder(
     // combinational logic
     assign control = 
     // R type instruction
+    (opcode == 6'b00_0000 & funct == 6'b00_1000) ? 8'b1000_0001 : // Jr
+    (opcode == 6'b00_0000 & funct == 6'b00_1001) ? 8'b1000_0011 : // Jalr
     (opcode == 6'b00_0000) ? 8'b1000_0010 : // R-type
-    (opcode[5:3] == 3'b001) ? 8'b0100_0010 : // I-tyoe
+    (opcode[5:3] == 3'b001) ? 8'b0100_0010 : // I-type
     (opcode == 6'b10_1011) ? 8'b0100_1000 : // sw
     (opcode == 6'b10_0011) ? 8'b0110_0110 : // lw
     (opcode == 6'b00_0100) ? 8'b0001_0000 : // beq
-    (opcode == 6'b00_0010) ? 8'b0000_0001 : // jump
+    (opcode[5:1] == 5'b00_001) ? 8'b0000_0001 : // j & jar
     0;                                          // default
     
+    assign Link = (opcode == 6'b00_0000 & funct == 6'b00_1001) |    //jalr
+                  (opcode == 6'b00_0011);                           // jal
+    assign JumpV = (opcode == 6'b00_0000 & funct[5:1] == 5'b00100);   // jr & jalr
+
+
 endmodule

@@ -21,7 +21,7 @@
 
 
 module datapath(
-    input clk,rst,Mem2Reg,PCsrc,ALUsrc,RegDst,RegWrite,Jump,ShiftI,    // control signals 
+    input clk,rst,Mem2Reg,PCsrc,ALUsrc,RegDst,RegWrite,Jump,ShiftI, JumpV, Link,    // control signals 
     input [7:0] alucontrol, // control signals 
     output overflow,zero,   // ALU output signal
     output [31:0] PCout,    // instruction address
@@ -37,9 +37,9 @@ module datapath(
     wire [31:0] PCin,PCout,imoffset,branchAddr,PCAdd4,NewAddr,jumpAddr;
     
     Mux #(.MSB(4)) mux0(.in0(inst[20:16]),.in1(inst[15:11]),.signal(RegDst),.out(RegWriteAddr));   // RegDst
-    Mux mux_shift_imm(.in0(RegReadData1),.in1({27'b0,inst[10:6]}),.signal(ShiftI),.out(ALUin0));   // ALUsrc0
-    Mux mux1(.in0(RegReadData2),.in1(immediate),.signal(ALUsrc),.out(ALUin1));   // ALUsrc1
-    Mux mux2(.in0(aluout),.in1(readdata),.signal(Mem2Reg),.out(RegWriteData));   // Mem2Reg
+    Mux mux_shift_imm(.in0(RegReadData1),.in1({27'b0,inst[10:6]}),.signal(ShiftI),.out(ALUin0));   // ALUin0
+    Mux mux1(.in0(RegReadData2),.in1(immediate),.signal(ALUsrc),.out(ALUin1));   // ALUin1
+    assign RegWriteData = Mem2Reg ? readdata : ((Link) ? PCAdd8 : aluout);      // Mem2Reg
     Mux mux3(.in0(PCAdd4),.in1(branchAddr),.signal(PCsrc),.out(NewAddr));        // PCsrc
     Mux mux4(.in0(NewAddr),.in1(jumpAddr),.signal(Jump),.out(PCin));         // Jump
     
@@ -74,9 +74,10 @@ module datapath(
     );
     
     Adder PC4(PCout,32'd4,PCAdd4);
+    Adder PC8(PCout,32'd8,PCAdd8);
     sl2 shift0(.in(immediate),.out(imoffset));
     Adder branchTarget(PCAdd4,imoffset,branchAddr);
-    sl2 shift1(.in({6'b000000,inst[25:0]}),.out(jumpAddr));
+    assign jumpAddr = JumpV ? RegReadData1 : {6'b000000,inst[25:0],2'b00};
     
     assign writedata = RegReadData2;
 endmodule

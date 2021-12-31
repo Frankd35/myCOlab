@@ -29,13 +29,13 @@ module mips(
 	input wire[31:0] readdata 
     );
 	
-	wire Mem2Reg,ALUsrc,RegDst,RegWrite,Jump,ShiftV,PCsrc,zero,overflow;
+	wire Mem2Reg,ALUsrc,RegDst,RegWrite,Jump,ShiftI,JumpV,Link,PCsrc,zero,overflow;
 	wire[7:0] alucontrol;
 
-	Controller c(instr[31:26],instr[5:0],zero,alucontrol,
-		PCsrc, RegWrite, memwrite, MemRead,RegDst, ALUsrc, Mem2Reg, Beq, Jump, ShiftV);
+	Controller c(instr,zero,alucontrol,
+		PCsrc, RegWrite, memwrite, MemRead,RegDst, ALUsrc, Mem2Reg, Beq, Jump, ShiftI, JumpV, Link);
 
-	datapath dp(clk,rst,Mem2Reg,PCsrc,ALUsrc,RegDst,RegWrite,Jump,ShiftV,
+	datapath dp(clk,rst,Mem2Reg,PCsrc,ALUsrc,RegDst,RegWrite,Jump,ShiftI, JumpV, Link,
 		alucontrol,overflow,zero,PCout,instr,aluout,writedata,readdata
 		    ,RegWriteData);
 	

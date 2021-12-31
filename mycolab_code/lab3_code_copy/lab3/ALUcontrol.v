@@ -4,7 +4,8 @@
 
 module ALUcontrol(
     input [5:0] opcode,
-    input [5:0] funct,  // inst[5:0]
+    input [5:0] funct,
+    input [4:0] rt,
     output [7:0] alucontrol
     );
     
@@ -72,7 +73,15 @@ module ALUcontrol(
         (`BEQ == opcode) ? `EXE_BEQ_OP :
         (`BGEZ == opcode) ? `EXE_BGEZ_OP :
         (`BGTZ == opcode) ? `EXE_BGTZ_OP :
-        // (`BLEZ == opcode) ? `EXE_BLEZ_OP :       these fucking inst has same opcode and  
+        (`BLEZ == opcode) ? 
+        (
+            (rt == 5'b00000) ? `EXE_BLTZ_OP : 
+            (rt == 5'b10000) ? `EXE_BLTZAL_OP : 
+            (rt == 5'b00001) ? `EXE_BGEZ_OP : 
+            (rt == 5'b10001) ? `EXE_BGEZAL_OP : 
+            8'hff
+        ) :
+        // (`BLEZ == opcode) ? `EXE_BLEZ_OP :       these fucking inst has same opcode but  
         // (`BLTZ == opcode) ? `EXE_BLTZ_OP :       different rt field,
         // (`BGEZAL == opcode) ? `EXE_BGEZAL_OP :   figure it out before add em into datapath
         // (`BLTZAL == opcode) ? `EXE_BLTZAL_OP :
