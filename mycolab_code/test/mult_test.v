@@ -16,19 +16,23 @@ module usigned_multiplier_sim();
     end
 
     initial begin
-        sclr = 1;
+
+        alucontrol = 0;        
+        A = 32'hffff_fffe;
+        B = 32'd4;
         #10
         sclr = 0;
         alucontrol = `EXE_MULT_OP;
-        A = 32'hffff_fffe;
-        B = 32'd4;
-        #100
-        alucontrol = `EXE_MULTU_OP;
         
-        #100
+        #10 alucontrol = 0;
+        #90
+        alucontrol = `EXE_MULTU_OP;
+        #10 alucontrol = 0;
+        #90
         A = 32'd2;
         alucontrol = `EXE_MULT_OP;
-        # 100
+        #10 alucontrol = 0;
+        #90
         alucontrol = `EXE_MULTU_OP;
 
     end
