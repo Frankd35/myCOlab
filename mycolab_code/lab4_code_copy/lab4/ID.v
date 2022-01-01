@@ -110,5 +110,5 @@ module ID(
     assign Rs = IF_ID_instr[25:21];
     assign Rt = IF_ID_instr[20:16];
     assign Rd = IF_ID_instr[15:11];
-    assign tmp = IF_ID_instr[10:6];
+    assign shamt = IF_ID_instr[10:6];
 endmodule
