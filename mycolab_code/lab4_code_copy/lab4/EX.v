@@ -22,12 +22,12 @@
 
 module EX(
     input ALUsrc,
-    input RegDst,
+    input RegDst,ID_EX_ShiftI,
     input [7:0] ID_EX_alucontrol,
     input [3:0] forwardSignal,  // [3:2] for Reg[rs] and [1:0] for Reg[rt]
     input [31:0] ID_EX_RegReadData1,ID_EX_RegReadData2,ID_EX_immediate,
     input [31:0] EX_MEM_aluout,WBvalue,
-    input [4:0] ID_EX_Rt,ID_EX_Rd,
+    input [4:0] ID_EX_Rt,ID_EX_Rd,ID_EX_shamt,
     output [31:0] ALUout,
     output [31:0] forwardRtData,
     output [4:0] Rd_EX
@@ -35,10 +35,12 @@ module EX(
     
     
     // ALU source forward multiplexer
-    wire [31:0] forwardRsData, forwardRtData,ID_EX_RegReadData1,ID_EX_RegReadData2;
+    wire [31:0] tmp,forwardRsData,forwardRtData,ID_EX_RegReadData1,ID_EX_RegReadData2;
     
+    assign tmp = ID_EX_ShiftI ? {27'b0,ID_EX_shamt} : ID_EX_RegReadData1;
+
     Mux3 muxRs(
-    .in0(ID_EX_RegReadData1),
+    .in0(tmp),
     .in1(EX_MEM_aluout),
     .in2(WBvalue),
     .signal(forwardSignal[3:2]),

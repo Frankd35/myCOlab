@@ -84,14 +84,14 @@ module datapath(
     wire Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID;    // ID to ID_EX
     wire [7:0] alucontrol_ID;
     wire [31:0] RegReadData1,RegReadData2,immediate;
-    wire [4:0] Rs,Rt,Rd;
+    wire [4:0] Rs,Rt,Rd,shamt;
     // ID stage
     ID IDstage(
     .clk(clk),.rst(rst),.stall(stall),
     .MEM_WB_RegWrite(MEM_WB_RegWrite),
     .MEM_WB_Rd(MEM_WB_Rd),
     .forwardSignal(forwardSignalID),  // [3:2] for Reg[rs] and [1:0] for Reg[rt]
-    .IF_ID_instr(IF_ID_instr),.IF_ID_PCout(IF_ID_PCout),
+    .IF_ID_instr(IF_ID_instr),.IF_ID_PCout(IF_ID_PCout),.ShiftI_ID(ShiftI_ID),
     .WBvalue(WBvalue),
     .EX_MEM_aluout(EX_MEM_ALUout),
     // output
@@ -100,20 +100,20 @@ module datapath(
     .branch(branch),.Jump(jump),.Beq(Beq),
     .RegReadData1(RegReadData1),.RegReadData2(RegReadData2),.immediate(immediate),
     .PCadd4(PCadd4),.jumpAddr(jumpAddr),.branchAddr(branchAddr),
-    .Rs(Rs),.Rt(Rt),.Rd(Rd)
+    .Rs(Rs),.Rt(Rt),.Rd(Rd),.shamt(shamt)
     );    
     
     wire ID_EX_Mem2Reg,ID_EX_RegWrite,ID_EX_MemWrite,ID_EX_ALUsrc,ID_EX_RegDst;
     wire [7:0] ID_EX_alucontrol;
     wire [31:0] ID_EX_RegReadData1,ID_EX_RegReadData2,ID_EX_immediate;
-    wire [4:0] ID_EX_Rs,ID_EX_Rt,ID_EX_Rd;
+    wire [4:0] ID_EX_Rs,ID_EX_Rt,ID_EX_Rd,ID_EX_shamt;
     // ID/EX register
-    flopflip #(12)ID_EX_Controlsignal_resgister(
+    flopflip #(13)ID_EX_Controlsignal_resgister(
     .clk(clk),
     .rst(rst),
     .en(1),
-    .in({Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,alucontrol_ID}),
-    .r({ID_EX_Mem2Reg,ID_EX_RegWrite,ID_EX_MemWrite,ID_EX_ALUsrc,ID_EX_RegDst,ID_EX_alucontrol})
+    .in({Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,ShiftI_ID,alucontrol_ID}),
+    .r({ID_EX_Mem2Reg,ID_EX_RegWrite,ID_EX_MemWrite,ID_EX_ALUsrc,ID_EX_RegDst,ID_EX_ShiftI,ID_EX_alucontrol})
     );
     
     flopflip ID_EX_ReadData1_resgister(
@@ -140,12 +140,12 @@ module datapath(
     .r(ID_EX_immediate)
     );
     
-    flopflip #(14) ID_EX_instructionfield_resgister(
+    flopflip #(19) ID_EX_instructionfield_resgister(
     .clk(clk),
     .rst(rst),
     .en(1),
-    .in({Rs,Rt,Rd}),
-    .r({ID_EX_Rs,ID_EX_Rt,ID_EX_Rd})
+    .in({Rs,Rt,Rd,shamt}),
+    .r({ID_EX_Rs,ID_EX_Rt,ID_EX_Rd,ID_EX_shamt})
     );
     
     
@@ -153,14 +153,16 @@ module datapath(
     wire [4:0] Rd_EX;
     // EX stage
     EX  EXstage(
+    //input
     ID_EX_ALUsrc,
-    ID_EX_RegDst,
+    ID_EX_RegDst,ID_EX_ShiftI,
     ID_EX_alucontrol,
     forwardSignalEX,  // [3:2] for Reg[rs] and [1:0] for Reg[rt]
     ID_EX_RegReadData1,ID_EX_RegReadData2,ID_EX_immediate,
     EX_MEM_ALUout,
     WBvalue,
-    ID_EX_Rt,ID_EX_Rd,
+    ID_EX_Rt,ID_EX_Rd,ID_EX_shamt,
+    // output
     ALUout_EX,
     forwardRtData_EX,
     Rd_EX

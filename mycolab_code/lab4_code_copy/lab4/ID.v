@@ -28,11 +28,11 @@ module ID(
     input [4:0] MEM_WB_Rd,
     input [3:0] forwardSignal,  // [3:2] for Reg[rs] and [1:0] for Reg[rt]
     input [31:0] IF_ID_instr,IF_ID_PCout,WBvalue,EX_MEM_aluout,
-    output Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,
+    output Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,ShiftI_ID,
     output [7:0] alucontrol_ID,
     output branch,Beq,Jump,
     output [31:0] RegReadData1,RegReadData2,immediate,PCadd4,jumpAddr,branchAddr,
-    output [4:0] Rs,Rt,Rd
+    output [4:0] Rs,Rt,Rd,shamt
     );    
     wire Mem2Reg,RegWrite,MemWrite,ALUsrc,RegDst,Beq,Jump,ShiftI,JumpV,Link;   // control signals
     wire [7:0] alucontrol;      // control signals
@@ -98,11 +98,11 @@ module ID(
     // WB control: Mem2Reg_ID,RegWrite_ID                   2bit
     // MEM control: memwrite_ID                             1bit
     // EX control: ALUsrc_ID,RegDst_ID,alucontrol_ID        8bit
-    Mux #(12) mux_control_signals(
-    .in0({Mem2Reg,RegWrite,MemWrite,ALUsrc,RegDst,alucontrol}),
+    Mux #(13) mux_control_signals(
+    .in0({Mem2Reg,RegWrite,MemWrite,ALUsrc,RegDst,ShiftI,alucontrol}),
     .in1(0),
     .signal(stall | (IF_ID_instr == 0)),
-    .out({Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,alucontrol_ID})
+    .out({Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,ShiftI_ID,alucontrol_ID})
     );
     
     
@@ -110,4 +110,5 @@ module ID(
     assign Rs = IF_ID_instr[25:21];
     assign Rt = IF_ID_instr[20:16];
     assign Rd = IF_ID_instr[15:11];
+    assign tmp = IF_ID_instr[10:6];
 endmodule
