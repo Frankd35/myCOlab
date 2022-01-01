@@ -76,10 +76,12 @@ module ALU(
         // (alucontrol == `EXE_DIV_OP) ? in0 + in1 :
         // (alucontrol == `EXE_DIVU_OP) ? in0 + in1 :
 
-        (alucontrol == `EXE_J_OP) ? in0 + in1 :
-        (alucontrol == `EXE_JAL_OP) ? in0 + in1 :
-        (alucontrol == `EXE_JALR_OP) ? in0 + in1 :
-        (alucontrol == `EXE_JR_OP) ? in0 + in1 :
+        // do not need alu
+        // (alucontrol == `EXE_J_OP) ? in0 + in1 :
+        // (alucontrol == `EXE_JAL_OP) ? in0 + in1 :
+        // (alucontrol == `EXE_JALR_OP) ? in0 + in1 :
+        // (alucontrol == `EXE_JR_OP) ? in0 + in1 :
+        
         (alucontrol == `EXE_BEQ_OP) ? in0 + in1 :
         (alucontrol == `EXE_BGEZ_OP) ? in0 + in1 :
         (alucontrol == `EXE_BGEZAL_OP) ? in0 + in1 :
