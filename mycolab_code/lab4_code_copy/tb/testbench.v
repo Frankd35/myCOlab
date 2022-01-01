@@ -26,13 +26,16 @@ module testbench();
 
 	wire[31:0] writedata,dataadr,pc,instr;
 	wire memwrite;
-    
+
+    wire [39:0] ascii;
+
     wire [4:0] rs,rt,rd;
     assign rs = instr[25:21];
     assign rt = instr[20:16];
     assign rd = instr[15:11];
 	top dut(clk,rst,writedata,dataadr,pc,instr,memwrite);
 
+	instdec decode(instr,ascii);
 	initial begin 
 		rst <= 1;
 		#200;
@@ -47,18 +50,18 @@ module testbench();
 	
 	end
 
-	always @(negedge clk) begin
-		if(memwrite) begin
-			/* code */
-			if(dataadr === 84 & writedata === 7) begin
-				/* code */
-				$display("Simulation succeeded");
-				$stop;
-			end else if(dataadr !== 80) begin
-				/* code */
-				$display("Simulation Failed");
-				$stop;
-			end
-		end
-	end
+//	always @(negedge clk) begin
+//		if(memwrite) begin
+//			/* code */
+//			if(dataadr === 84 & writedata === 7) begin
+//				/* code */
+//				$display("Simulation succeeded");
+//				$stop;
+//			end else if(dataadr !== 80) begin
+//				/* code */
+//				$display("Simulation Failed");
+//				$stop;
+//			end
+//		end
+//	end
 endmodule
