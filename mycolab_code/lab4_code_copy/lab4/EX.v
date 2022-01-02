@@ -21,22 +21,25 @@
 
 
 module EX(
-    input ALUsrc,
+    input clk,rst,ALUsrc,
     input RegDst,ID_EX_ShiftI,
     input [7:0] ID_EX_alucontrol,
     input [3:0] forwardSignal,  // [3:2] for Reg[rs] and [1:0] for Reg[rt]
     input [31:0] ID_EX_RegReadData1,ID_EX_RegReadData2,ID_EX_immediate,
     input [31:0] EX_MEM_aluout,WBvalue,
     input [4:0] ID_EX_Rt,ID_EX_Rd,ID_EX_shamt,
-    output [31:0] ALUout,
+    output [31:0] out,
     output [31:0] forwardRtData,
-    output [4:0] Rd_EX
+    output [4:0] Rd_EX,
+    output result_notok
     );
     
     
     // ALU source forward multiplexer
-    wire [31:0] tmp,forwardRsData,forwardRtData,ID_EX_RegReadData1,ID_EX_RegReadData2;
-    
+    wire [31:0] tmp,forwardRsData,forwardRtData,ID_EX_RegReadData1,ID_EX_RegReadData2,ALUin,hilo_out,ALUout;
+    wire [63:0] mul_result;
+    wire result_notok,mult_result_ok;
+
     assign tmp = ID_EX_ShiftI ? {27'b0,ID_EX_shamt} : ID_EX_RegReadData1;
 
     Mux3 muxRs(
@@ -56,7 +59,6 @@ module EX(
     );
     
     
-    wire [31:0] ALUin;
     // ALUsrc multiplexer
     Mux Mux_ALUsrc(
     .in0(forwardRtData),
@@ -74,6 +76,17 @@ module EX(
     .zero(),.overflow() // do no use
     );
     
+    // MU
+    MU mu(
+    .clk(~clk),
+    .sclr(rst),
+    .in0(forwardRsData),
+    .in1(ALUin),
+    .alucontrol(ID_EX_alucontrol),
+    .result_ok(mult_result_ok),
+    .result(mul_result)     // unused，添加hilo
+    );
+
     // RegDst multiplexer
     Mux #(4) Mux_RegDst(
     .in0(ID_EX_Rt),
@@ -81,5 +94,18 @@ module EX(
     .signal(RegDst),
     .out(Rd_EX)
     );
-    
+
+    // hilo register
+    hilo Hilo(
+    .clk(clk),.rst(rst),
+    .regin(forwardRsData),
+    .result(mul_result),
+    .alucontrol(alucontrol),
+    .result_ok(result_ok),
+    .hilo_out(hilo_out)
+    );
+
+    assign out = ((alucontrol == `EXE_MFHI_OP) | (alucontrol == `EXE_MFLO_OP)) ? hilo_out : ALUout;
+    assign result_notok = ((alucontrol == `EXE_MULT_OP) | (alucontrol == `EXE_MULTU_OP)) & (~mult_result_ok);
+
 endmodule

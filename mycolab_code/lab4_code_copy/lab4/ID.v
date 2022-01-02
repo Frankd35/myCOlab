@@ -93,11 +93,11 @@ module ID(
     // controller
     Controller c(IF_ID_instr,zero,alucontrol,
 		PCsrc, RegWrite, MemWrite, MemRead,RegDst, ALUsrc, Mem2Reg, Beq, Jump, ShiftI, JumpV, Link);
-    // control signals 
     
+    // control signals 
     // WB control: Mem2Reg_ID,RegWrite_ID                   2bit
     // MEM control: memwrite_ID                             1bit
-    // EX control: ALUsrc_ID,RegDst_ID,alucontrol_ID        8bit
+    // EX control: ALUsrc_ID,RegDst_ID,ShiftI_ID,alucontrol_ID        9bit
     Mux #(13) mux_control_signals(
     .in0({Mem2Reg,RegWrite,MemWrite,ALUsrc,RegDst,ShiftI,alucontrol}),
     .in1(0),

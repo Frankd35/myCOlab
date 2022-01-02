@@ -11,7 +11,6 @@ module MU (
 );
     wire [31:0] A,B;
     wire [63:0] P;
-    // reg [7:0] alucontrol;
     reg [3:0] count = 0;
     reg sign = 0;
     reg state = 0;
@@ -28,13 +27,11 @@ module MU (
     end
 
     always @(posedge clk) begin
-        // if (sclr) begin
-        //     count <= 0;
-        //     state <= idle;
-        //     sign <= (alucontrol == `EXE_MULT_OP) & (in0[31] ^ in1[31]);
-        // end
-
-        if (state == idle) begin
+        if (sclr) begin
+            count <= 0;
+            state <= idle;
+            sign <= 0;
+        end else if (state == idle) begin
             count <= 0;
             state <= next_state;
             sign <= (alucontrol == `EXE_MULT_OP) & (in0[31] ^ in1[31]);

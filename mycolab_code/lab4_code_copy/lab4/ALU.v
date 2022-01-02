@@ -50,14 +50,7 @@ module ALU(
         (alucontrol == `EXE_SRA_OP) ? (in1 >> in0) | {{16{in1[31]}},16'h0000} :     // bit mask
         (alucontrol == `EXE_SRAV_OP) ? (in1 >> in0) | {{16{in1[31]}},16'h0000} :
 
-        // (alucontrol == `EXE_MFHI_OP) ? in0 + in1 :
-        // (alucontrol == `EXE_MTHI_OP) ? in0 + in1 :
-        // (alucontrol == `EXE_MFLO_OP) ? in0 + in1 :
-        // (alucontrol == `EXE_MTLO_OP) ? in0 + in1 :
-
         // usigned means no OVERFLOW exception
-        // operator +/- </> 实现的是有符号还是无符号，从reg取出来的值被认为是有符号还是无符号的？
-        // 需不需要自己实现有符号/无符号的运算符？
         (alucontrol == `EXE_SLT_OP) ? ($signed(in0) < $signed(in1)) :
         (alucontrol == `EXE_SLTU_OP) ? (in0 < in1) :
         (alucontrol == `EXE_SLTI_OP) ? ($signed(in0) < $signed(in1)) :
@@ -70,9 +63,6 @@ module ALU(
         (alucontrol == `EXE_ADDIU_OP) ? in0 + in1 :
 
         // 未实现
-        // (alucontrol == `EXE_MULT_OP) ? in0 + in1 :
-        // (alucontrol == `EXE_MULTU_OP) ? in0 + in1 :
-
         // (alucontrol == `EXE_DIV_OP) ? in0 + in1 :
         // (alucontrol == `EXE_DIVU_OP) ? in0 + in1 :
 
@@ -95,17 +85,11 @@ module ALU(
         (alucontrol == `EXE_LBU_OP) ? in0 + in1 :
         (alucontrol == `EXE_LH_OP) ? in0 + in1 :
         (alucontrol == `EXE_LHU_OP) ? in0 + in1 :
-        // (alucontrol == `EXE_LL_OP) ? in0 + in1 :
         (alucontrol == `EXE_LW_OP) ? in0 + in1 :
-        // (alucontrol == `EXE_LWL_OP) ? in0 + in1 :
-        // (alucontrol == `EXE_LWR_OP) ? in0 + in1 :
-        // (alucontrol == `EXE_PREF_OP) ? in0 + in1 :
         (alucontrol == `EXE_SB_OP) ? in0 + in1 :
-        // (alucontrol == `EXE_SC_OP) ? in0 + in1 :
         (alucontrol == `EXE_SH_OP) ? in0 + in1 :
         (alucontrol == `EXE_SW_OP) ? in0 + in1 :
-        // (alucontrol == `EXE_SWL_OP) ? in0 + in1 :
-        // (alucontrol == `EXE_SWR_OP) ? in0 + in1 :
+
         // (alucontrol == `EXE_SYNC_OP) ? in0 + in1 :
         32'hffff_fff0;                           // default
         

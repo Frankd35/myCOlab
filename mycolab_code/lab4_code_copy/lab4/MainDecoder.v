@@ -40,6 +40,8 @@ module MainDecoder(
     // R type instruction
     (opcode == 6'b00_0000 & funct == 6'b00_1000) ? 8'b1000_0001 : // Jr
     (opcode == 6'b00_0000 & funct == 6'b00_1001) ? 8'b1000_0011 : // Jalr
+    (opcode == 6'b00_0000 & funct[5:1] == 5'b01100) ? 8'b1000_0000 : // mult
+    (opcode == 6'b00_0000 & funct[5:2] == 4'b0100 & funct[0] == 1) ? 8'b1000_0000 : // mthi & mtlo
     (opcode == 6'b00_0000) ? 8'b1000_0010 : // R-type
     (opcode[5:3] == 3'b001) ? 8'b0100_0010 : // I-type
     (opcode == 6'b10_1011) ? 8'b0100_1000 : // sw

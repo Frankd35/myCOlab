@@ -35,7 +35,7 @@ module datapath(
     );
     
     // wire statement
-    wire stall,Beq,branch,jump; // control signals
+    wire stall_IF,stall_ID,stall_EX,Beq,branch,jump; // control signals
     wire [31:0] PCadd4,jumpAddr,branchAddr,PCout,IF_ID_PCout_;   // between IF ID
     wire [31:0] EX_MEM_ALUout,WBvalue,MEM_WB_writedata;  // forward datas
     wire [3:0] forwardSignalID,forwardSignalEX;
@@ -46,7 +46,7 @@ module datapath(
     IF IFstage(
     .clk(clk),
     .rst(rst),
-    .stall(stall),
+    .stall(stall_IF),
     .branch(branch),
     .jump(jump), 
     .PCadd4(PCadd4),
@@ -60,7 +60,7 @@ module datapath(
     flopflip IF_ID_instr_register(
     .clk(clk),
     .rst(rst),
-    .en(~stall),
+    .en(~stall_ID),
     .in(instr),
     .r(IF_ID_instr)
     );
@@ -68,7 +68,7 @@ module datapath(
     flopflip IF_ID_PCvalue_register(
     .clk(clk),
     .rst(rst),
-    .en(~stall),
+    .en(~stall_ID),
     .in(PCout),
     .r(IF_ID_PCout)
     );
@@ -87,7 +87,7 @@ module datapath(
     wire [4:0] Rs,Rt,Rd,shamt;
     // ID stage
     ID IDstage(
-    .clk(clk),.rst(rst),.stall(stall),
+    .clk(clk),.rst(rst),.stall(stall_ID),
     .MEM_WB_RegWrite(MEM_WB_RegWrite),
     .MEM_WB_Rd(MEM_WB_Rd),
     .forwardSignal(forwardSignalID),  // [3:2] for Reg[rs] and [1:0] for Reg[rt]
@@ -111,7 +111,7 @@ module datapath(
     flopflip #(13)ID_EX_Controlsignal_resgister(
     .clk(clk),
     .rst(rst),
-    .en(1),
+    .en(~stall_EX),
     .in({Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,ShiftI_ID,alucontrol_ID}),
     .r({ID_EX_Mem2Reg,ID_EX_RegWrite,ID_EX_MemWrite,ID_EX_ALUsrc,ID_EX_RegDst,ID_EX_ShiftI,ID_EX_alucontrol})
     );
@@ -119,7 +119,7 @@ module datapath(
     flopflip ID_EX_ReadData1_resgister(
     .clk(clk),
     .rst(rst),
-    .en(1),
+    .en(~stall_EX),
     .in(RegReadData1),
     .r(ID_EX_RegReadData1)
     );
@@ -127,7 +127,7 @@ module datapath(
     flopflip ID_EX_ReadData2_resgister(
     .clk(clk),
     .rst(rst),
-    .en(1),
+    .en(~stall_EX),
     .in(RegReadData2),
     .r(ID_EX_RegReadData2)
     );
@@ -135,7 +135,7 @@ module datapath(
     flopflip ID_EX_immediate_resgister(
     .clk(clk),
     .rst(rst),
-    .en(1),
+    .en(~stall_EX),
     .in(immediate),
     .r(ID_EX_immediate)
     );
@@ -143,7 +143,7 @@ module datapath(
     flopflip #(19) ID_EX_instructionfield_resgister(
     .clk(clk),
     .rst(rst),
-    .en(1),
+    .en(~stall_EX),
     .in({Rs,Rt,Rd,shamt}),
     .r({ID_EX_Rs,ID_EX_Rt,ID_EX_Rd,ID_EX_shamt})
     );
@@ -154,6 +154,7 @@ module datapath(
     // EX stage
     EX  EXstage(
     //input
+    clk,rst,
     ID_EX_ALUsrc,
     ID_EX_RegDst,ID_EX_ShiftI,
     ID_EX_alucontrol,
@@ -165,7 +166,8 @@ module datapath(
     // output
     ALUout_EX,
     forwardRtData_EX,
-    Rd_EX
+    Rd_EX,
+    result_notok
     );
     
     wire EX_MEM_Mem2Reg,EX_MEM_RegWrite,EX_MEM_MemWrite;
@@ -292,14 +294,14 @@ module datapath(
     forwardSignalEX[3:2],forwardSignalEX[1:0]
     );
     
-    generalforward gf(
-    MEM_WB_MemWrite,EX_MEM_Mem2Reg,
-    EX_MEM_ALUout,MEM_WB_ALUout,
-    Gforward
-    );
+    // generalforward gf(               lw+sw
+    // MEM_WB_MemWrite,EX_MEM_Mem2Reg,
+    // EX_MEM_ALUout,MEM_WB_ALUout,
+    // Gforward
+    // );
     
     hazard detaction(
-    Beq,jump,
+    Beq,jump,result_notok,
     ID_EX_RegWrite,
     EX_MEM_Mem2Reg,
     ID_EX_Mem2Reg,
