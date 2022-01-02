@@ -11,7 +11,8 @@ module DU (
 ); 
     wire [31:0] A,B;
     wire [63:0] P;
-    wire data_ready;
+    wire data_ready,stall;
+    reg [5:0] count = 0;
     reg sign = 0;
     reg state = 0;
     reg next_state = 0;
@@ -28,34 +29,35 @@ module DU (
 
     always @(posedge clk) begin
         if (sclr) begin
+            count <= 0;
             state <= idle;
             sign <= 0;
         end else if (state == idle) begin
+            count <= 0;
             state <= next_state;
             sign <= (alucontrol == `EXE_DIV_OP) & (divisor[31] ^ dividend[31]);
         end else  begin
+            count <= count + 1;
             state <= next_state;
         end
     end
 
     assign data_ready = (state == idle) & (next_state == lock);
-
+    assign result_ok = (count == 32);
     assign A = divisor[31] & (alucontrol == `EXE_DIV_OP) ? (~divisor + 1) : divisor;
     assign B = dividend[31] & (alucontrol == `EXE_DIV_OP) ? (~dividend + 1) : dividend;
 
     assign result = sign ? {(~P[31:0] + 1),(~P[63:32] + 1)} : {P[31:0],P[63:0]};
 
-    div_gen_0 div_unit (
-    .aclk(clk),                                            // input wire aclk
-    .aresetn(sclr),                                        // input wire aresetn
-    .s_axis_divisor_tvalid(state),                    // input wire s_axis_divisor_tvalid
-    .s_axis_divisor_tready(s_axis_divisor_tready),         // output wire s_axis_divisor_tready
-    .s_axis_divisor_tdata(A),                        // input wire [31 : 0] s_axis_divisor_tdata
-    .s_axis_dividend_tvalid(data_ready),                   // input wire s_axis_dividend_tvalid
-    .s_axis_dividend_tready(s_axis_dividend_tready),        // output wire s_axis_dividend_tready
-    .s_axis_dividend_tdata(B),                       // input wire [31 : 0] s_axis_dividend_tdata
-    .m_axis_dout_tvalid(result_ok),                         // output wire m_axis_dout_tvalid
-    .m_axis_dout_tdata(P)                                   // output wire [63 : 0] m_axis_dout_tdata
+    div_radix2 div(
+    clk,
+    sclr,
+    B,  //dividend
+    A,  //divisor
+    data_ready,
+    0,   //1:signed
+    stall,
+    P    
     );
 
 

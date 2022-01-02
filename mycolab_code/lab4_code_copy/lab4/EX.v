@@ -37,8 +37,8 @@ module EX(
     
     // ALU source forward multiplexer
     wire [31:0] tmp,forwardRsData,forwardRtData,ID_EX_RegReadData1,ID_EX_RegReadData2,ALUin,hilo_out,ALUout;
-    wire [63:0] mul_result;
-    wire result_notok,mult_result_ok;
+    wire [63:0] mul_result,div_result,to_hilo;
+    wire result_notok,mult_result_ok,div_result_ok;
 
     assign tmp = ID_EX_ShiftI ? {27'b0,ID_EX_shamt} : ID_EX_RegReadData1;
 
@@ -87,6 +87,18 @@ module EX(
     .result(mul_result)     // unused，添加hilo
     );
 
+    // DU
+    DU du(
+    .clk(~clk),
+    .sclr(rst),
+    .dividend(forwardRsData),
+    .divisor(ALUin),
+    .alucontrol(ID_EX_alucontrol),
+    .result_ok(div_result_ok),
+    .result(div_result)     
+    );
+
+
     // RegDst multiplexer
     Mux #(4) Mux_RegDst(
     .in0(ID_EX_Rt),
@@ -95,13 +107,15 @@ module EX(
     .out(Rd_EX)
     );
 
+
+    assign to_hilo = mult_result_ok ? mul_result : (div_result_ok ? div_result : 0);
     // hilo register
     hilo Hilo(
     .clk(clk),.rst(rst),
     .regin(forwardRsData),
-    .result(mul_result),
+    .result(to_hilo),
     .alucontrol(ID_EX_alucontrol),
-    .result_ok(mult_result_ok),
+    .result_ok(mult_result_ok | div_result_ok),
     .hilo_out(hilo_out)
     );
 
