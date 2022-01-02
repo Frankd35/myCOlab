@@ -120,6 +120,8 @@ module EX(
     );
 
     assign out = ((ID_EX_alucontrol == `EXE_MFHI_OP) | (ID_EX_alucontrol == `EXE_MFLO_OP)) ? hilo_out : ALUout;
-    assign result_notok = ((ID_EX_alucontrol == `EXE_MULT_OP) | (ID_EX_alucontrol == `EXE_MULTU_OP)) & (~mult_result_ok);
+    assign result_notok = (((ID_EX_alucontrol == `EXE_MULT_OP) | (ID_EX_alucontrol == `EXE_MULTU_OP)) & (~mult_result_ok)) |
+                            (((ID_EX_alucontrol == `EXE_DIV_OP) | (ID_EX_alucontrol == `EXE_DIVU_OP)) & (~div_result_ok));
+
 
 endmodule
