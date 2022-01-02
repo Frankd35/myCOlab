@@ -47,7 +47,7 @@ module DU (
     assign A = divisor[31] & (alucontrol == `EXE_DIV_OP) ? (~divisor + 1) : divisor;
     assign B = dividend[31] & (alucontrol == `EXE_DIV_OP) ? (~dividend + 1) : dividend;
 
-    assign result = sign ? {(~P[63:32] + 1),(~P[31:0] + 1)} : {P[63:0],P[31:0]};
+    assign result = sign ? {(~P[63:32] + 1),(~P[31:0] + 1)} : {P[63:32 ],P[31:0]};
 
     div_radix2 div(
     clk,
