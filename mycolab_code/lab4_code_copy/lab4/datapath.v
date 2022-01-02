@@ -309,6 +309,6 @@ module datapath(
     IF_ID_instr[20:16],
     Rd_EX,
     EX_MEM_Rd,
-    stall
+    stall_IF, stall_ID, stall_EX
     );
 endmodule

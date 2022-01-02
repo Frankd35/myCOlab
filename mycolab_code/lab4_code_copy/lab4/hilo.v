@@ -8,13 +8,16 @@ module hilo (
 );
     reg [63:0] q = 0;
 
-    always @(posedge clk) begin
+    // this fucking thing need be sensitive to both posedge & negedge of clk
+    // for posedge, the new MU/DU result can be written into hile register
+    // for negedge, the mthi/mtlo instruction will write data to hilo
+    always @(posedge clk, negedge clk) begin            // 我不太确定这种写法会不会有问题，反正仿真能跑 tmd
         if (rst)
             q <= 0;
-        else if (result_ok) begin
+        else if (clk & result_ok) begin                 // posedge
             q <= result;
         end
-        else begin
+        else if(~clk) begin                             // negedge
             case (alucontrol)
                 `EXE_MTHI_OP:   q[63:32] <= regin; 
                 `EXE_MTLO_OP:   q[31:0] <= regin; 

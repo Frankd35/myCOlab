@@ -100,12 +100,12 @@ module EX(
     .clk(clk),.rst(rst),
     .regin(forwardRsData),
     .result(mul_result),
-    .alucontrol(alucontrol),
-    .result_ok(result_ok),
+    .alucontrol(ID_EX_alucontrol),
+    .result_ok(mult_result_ok),
     .hilo_out(hilo_out)
     );
 
-    assign out = ((alucontrol == `EXE_MFHI_OP) | (alucontrol == `EXE_MFLO_OP)) ? hilo_out : ALUout;
-    assign result_notok = ((alucontrol == `EXE_MULT_OP) | (alucontrol == `EXE_MULTU_OP)) & (~mult_result_ok);
+    assign out = ((ID_EX_alucontrol == `EXE_MFHI_OP) | (ID_EX_alucontrol == `EXE_MFLO_OP)) ? hilo_out : ALUout;
+    assign result_notok = ((ID_EX_alucontrol == `EXE_MULT_OP) | (ID_EX_alucontrol == `EXE_MULTU_OP)) & (~mult_result_ok);
 
 endmodule

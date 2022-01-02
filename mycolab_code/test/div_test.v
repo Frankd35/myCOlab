@@ -2,7 +2,7 @@
 `include "defines.vh"
 `include "defines2.vh"
 
-module usigned_multiplier_sim();
+module usigned_div_sim();
     reg clk = 1;
     reg sclr = 1;
     reg [31:0] A,B;
@@ -18,26 +18,28 @@ module usigned_multiplier_sim();
     initial begin
         
         alucontrol = 0;        
-        A = 32'hffff_fffe;
-        B = 32'd4;
+        A = 32'hffff_fffd;
+        B = 32'd2;
         #10
         sclr = 0;
-        alucontrol = `EXE_MULT_OP;
+        alucontrol = `EXE_DIV_OP;
         
         #10 alucontrol = 0;
-        #90
-        alucontrol = `EXE_MULTU_OP;
+        #380
+        B = 32'hffff_fff0;
+        alucontrol = `EXE_DIVU_OP;
         #10 alucontrol = 0;
-        #90
-        A = 32'd2;
-        alucontrol = `EXE_MULT_OP;
+        #390
+        A = 32'd255;
+        B = 32'd16;
+        alucontrol = `EXE_DIV_OP;
         #10 alucontrol = 0;
-        #90
-        alucontrol = `EXE_MULTU_OP;
+        #390
+        alucontrol = `EXE_DIVU_OP;
 
     end
 
-    MU mu(
+    DU mu(
         ~clk,sclr,
         A,B,
         alucontrol,
