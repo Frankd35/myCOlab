@@ -78,13 +78,13 @@ module ALU(
         (alucontrol == `EXE_BNE_OP) ? in0 + in1 :
 
         // do nothing here
-        // (alucontrol == `EXE_LB_OP) ? in0 + in1 :
-        // (alucontrol == `EXE_LBU_OP) ? in0 + in1 :
-        // (alucontrol == `EXE_LH_OP) ? in0 + in1 :
-        // (alucontrol == `EXE_LHU_OP) ? in0 + in1 :
+        (alucontrol == `EXE_LB_OP) ? in0 + in1 :
+        (alucontrol == `EXE_LBU_OP) ? in0 + in1 :
+        (alucontrol == `EXE_LH_OP) ? in0 + in1 :
+        (alucontrol == `EXE_LHU_OP) ? in0 + in1 :
         (alucontrol == `EXE_LW_OP) ? in0 + in1 :
-        // (alucontrol == `EXE_SB_OP) ? in0 + in1 :
-        // (alucontrol == `EXE_SH_OP) ? in0 + in1 :
+        (alucontrol == `EXE_SB_OP) ? in0 + in1 :
+        (alucontrol == `EXE_SH_OP) ? in0 + in1 :
         (alucontrol == `EXE_SW_OP) ? in0 + in1 :
 
         // (alucontrol == `EXE_SYNC_OP) ? in0 + in1 :

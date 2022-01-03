@@ -54,7 +54,7 @@ module MU (
     .CLK(clk),    // input wire CLK
     .A(A),        // input wire [31 : 0] A
     .B(B),        // input wire [31 : 0] B
-    .SCLR(0),  // input wire SCLR
+    .SCLR(1'b0),  // input wire SCLR
     .P(P)        // output wire [63 : 0] P
     );
 

@@ -211,40 +211,46 @@ module datapath(
     wire [31:0] readdata_MEM,readdata_mask;
     // MEM stage
     assign MemAddr = EX_MEM_ALUout;
-    assign writedata = EX_MEM_forwardRtData;
+    assign writedata = (EX_MEM_alucontrol == `EXE_SW_OP) ?  EX_MEM_forwardRtData :
+                       (EX_MEM_alucontrol == `EXE_SH_OP) ? {2{EX_MEM_forwardRtData[15:0]}} : 
+                       (EX_MEM_alucontrol == `EXE_SB_OP) ? {4{EX_MEM_forwardRtData[7:0]}} :
+                       32'b0000;
+
+    // EX_MEM_forwardRtData;
         
     
     wire [1:0] bit_off;
 
+    assign bit_off = MemAddr[1:0];
     assign bit_mask = (EX_MEM_alucontrol == `EXE_SW_OP) ? 4'b1111 :
-                      (EX_MEM_alucontrol == `EXE_SH_OP) ? (bit_off[1] ? 4'b1100 : 4'b0011) :
+                      (EX_MEM_alucontrol == `EXE_SH_OP) ? (bit_off[1] ? 4'b0011 : 4'b1100) :
                       (EX_MEM_alucontrol == `EXE_SB_OP) ?
                       (
-                          (bit_off == 2'b00) ? 4'b0001 :  
-                          (bit_off == 2'b01) ? 4'b0010 :
-                          (bit_off == 2'b10) ? 4'b0100 :
-                          (bit_off == 2'b11) ? 4'b1000 : 4'b0000
+                          (bit_off == 2'b00) ? 4'b1000 :  
+                          (bit_off == 2'b01) ? 4'b0100 :
+                          (bit_off == 2'b10) ? 4'b0010 :
+                          (bit_off == 2'b11) ? 4'b0001 : 4'b0000
                       ) : 4'b0000;                      // lw & lh & lb
 
 
     assign readdata_mask = (EX_MEM_alucontrol == `EXE_LW_OP) ? readdata : 
                            (EX_MEM_alucontrol == `EXE_LH_OP)? ( 
-                               bit_off[1] ? {{16{readdata[31]}},readdata[31:16]} : {{16{readdata[15]}},readdata[15:0]}
+                               bit_off[1] ? {{16{readdata[15]}},readdata[15:0]} : {{16{readdata[31]}},readdata[31:16]}
                            ) :
                            (EX_MEM_alucontrol == `EXE_LHU_OP) ? ( 
-                               bit_off[1] ? {16'b0,readdata[31:16]} : {16'b0,readdata[15:0]}
+                               bit_off[1] ? {16'b0,readdata[15:0]} : {16'b0,readdata[31:16]}
                            ) :
                            (EX_MEM_alucontrol == `EXE_LB_OP) ? (
-                               (bit_off == 2'b00) ? {{24{readdata[7]}},readdata[7:0]} :
-                               (bit_off == 2'b01) ? {{24{readdata[15]}},readdata[15:8]} :
-                               (bit_off == 2'b10) ? {{24{readdata[23]}},readdata[23:16]} :
-                               (bit_off == 2'b11) ? {{24{readdata[31]}},readdata[31:24]} : 0
+                               (bit_off == 2'b11) ? {{24{readdata[7]}},readdata[7:0]} :
+                               (bit_off == 2'b10) ? {{24{readdata[15]}},readdata[15:8]} :
+                               (bit_off == 2'b01) ? {{24{readdata[23]}},readdata[23:16]} :
+                               (bit_off == 2'b00) ? {{24{readdata[31]}},readdata[31:24]} : 0
                            ) :
                            (EX_MEM_alucontrol == `EXE_LBU_OP) ? (
-                               (bit_off == 2'b00) ? {24'b0,readdata[7:0]} :
-                               (bit_off == 2'b01) ? {24'b0,readdata[15:8]} :
-                               (bit_off == 2'b10) ? {24'b0,readdata[23:16]} :
-                               (bit_off == 2'b11) ? {24'b0,readdata[31:24]} : 0
+                               (bit_off == 2'b11) ? {24'b0,readdata[7:0]} :
+                               (bit_off == 2'b10) ? {24'b0,readdata[15:8]} :
+                               (bit_off == 2'b01) ? {24'b0,readdata[23:16]} :
+                               (bit_off == 2'b00) ? {24'b0,readdata[31:24]} : 0
                            ) : 0;
 
 
