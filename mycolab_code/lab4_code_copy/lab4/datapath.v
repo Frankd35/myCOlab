@@ -1,4 +1,6 @@
 `timescale 1ns / 1ps
+`include "defines.vh"
+`include "defines2.vh"
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -28,9 +30,8 @@ module datapath(
     input [31:0] instr,
     output [31:0] MemAddr,
     output [31:0] writedata,
-    input [31:0] readdata
-
-    ,input [31:0] RegAddr,output [31:0] regout 
+    input [31:0] readdata,
+    output [3:0] bit_mask
 
     );
     
@@ -72,14 +73,6 @@ module datapath(
     .in(PCout),
     .r(IF_ID_PCout)
     );
-    
-    // flopflip IF_ID_PCvalue_register_(
-    // .clk(~clk),
-    // .rst(rst),
-    // .en(~stall),
-    // .in(PCout),
-    // .r(IF_ID_PCout_)
-    // );
 
     wire Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID;    // ID to ID_EX
     wire [7:0] alucontrol_ID;
@@ -172,6 +165,7 @@ module datapath(
     
     wire EX_MEM_Mem2Reg,EX_MEM_RegWrite,EX_MEM_MemWrite;
     wire [31:0] EX_MEM_forwardRtData;
+    wire [7:0] EX_MEM_alucontrol;
     wire [4:0] EX_MEM_Rd;
     // EX/MEM register
     flopflip #(2) EX_MEM_controlsignal_register(
@@ -206,11 +200,54 @@ module datapath(
     .r(EX_MEM_Rd)
     );
     
-    wire [31:0] readdata_MEM;
+    flopflip #(7) EX_MEM_alucontrol_register(
+    .clk(clk),
+    .rst(rst),
+    .en(1),
+    .in(ID_EX_alucontrol),
+    .r(EX_MEM_alucontrol)
+    );
+
+    wire [31:0] readdata_MEM,readdata_mask;
     // MEM stage
     assign MemAddr = EX_MEM_ALUout;
     assign writedata = EX_MEM_forwardRtData;
         
+    
+    wire [1:0] bit_off;
+
+    assign bit_mask = (EX_MEM_alucontrol == `EXE_SW_OP) ? 4'b1111 :
+                      (EX_MEM_alucontrol == `EXE_SH_OP) ? (bit_off[1] ? 4'b1100 : 4'b0011) :
+                      (EX_MEM_alucontrol == `EXE_SB_OP) ?
+                      (
+                          (bit_off == 2'b00) ? 4'b0001 :  
+                          (bit_off == 2'b01) ? 4'b0010 :
+                          (bit_off == 2'b10) ? 4'b0100 :
+                          (bit_off == 2'b11) ? 4'b1000 : 4'b0000
+                      ) : 4'b0000;                      // lw & lh & lb
+
+
+    assign readdata_mask = (EX_MEM_alucontrol == `EXE_LW_OP) ? readdata : 
+                           (EX_MEM_alucontrol == `EXE_LH_OP)? ( 
+                               bit_off[1] ? {{16{readdata[31]}},readdata[31:16]} : {{16{readdata[15]}},readdata[15:0]}
+                           ) :
+                           (EX_MEM_alucontrol == `EXE_LHU_OP) ? ( 
+                               bit_off[1] ? {16'b0,readdata[31:16]} : {16'b0,readdata[15:0]}
+                           ) :
+                           (EX_MEM_alucontrol == `EXE_LB_OP) ? (
+                               (bit_off == 2'b00) ? {{24{readdata[7]}},readdata[7:0]} :
+                               (bit_off == 2'b01) ? {{24{readdata[15]}},readdata[15:8]} :
+                               (bit_off == 2'b10) ? {{24{readdata[23]}},readdata[23:16]} :
+                               (bit_off == 2'b11) ? {{24{readdata[31]}},readdata[31:24]} : 0
+                           ) :
+                           (EX_MEM_alucontrol == `EXE_LBU_OP) ? (
+                               (bit_off == 2'b00) ? {24'b0,readdata[7:0]} :
+                               (bit_off == 2'b01) ? {24'b0,readdata[15:8]} :
+                               (bit_off == 2'b10) ? {24'b0,readdata[23:16]} :
+                               (bit_off == 2'b11) ? {24'b0,readdata[31:24]} : 0
+                           ) : 0;
+
+
     /*Mux Mux_MEM_WB_readdata(
     .in0(readdate),
     .in1(MEM_WB_writedata),
@@ -250,7 +287,7 @@ module datapath(
     .clk(clk),
     .rst(rst),
     .en(1),
-    .in(readdata),
+    .in(readdata_mask),
     .r(MEM_WB_readdata)
     );
     

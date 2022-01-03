@@ -1,8 +1,27 @@
 # 项目工程文件
 project/
+C_O_D_lab4.gen/
 
 # 暂时不需要的测试文件
 test/func_test_v0.03/
 test/perf_test_v0.01/
 test/n4ddr/
-C_O_D_lab4.gen/
+
+# ip核生成文件
+mycolab_code/lab4_code_copy/ip/data_ram/data_ram_ooc.xdc
+mycolab_code/lab4_code_copy/ip/data_ram/data_ram_sim_netlist.v
+mycolab_code/lab4_code_copy/ip/data_ram/data_ram_sim_netlist.vhdl
+mycolab_code/lab4_code_copy/ip/data_ram/data_ram_stub.v
+mycolab_code/lab4_code_copy/ip/data_ram/data_ram_stub.vhdl
+mycolab_code/lab4_code_copy/ip/data_ram/data_ram.dcp
+mycolab_code/lab4_code_copy/ip/data_ram/data_ram.veo
+mycolab_code/lab4_code_copy/ip/data_ram/data_ram.vho
+mycolab_code/lab4_code_copy/ip/data_ram/data_ram.xml
+mycolab_code/lab4_code_copy/ip/data_ram/summary.log
+mycolab_code/lab4_code_copy/ip/data_ram/doc/blk_mem_gen_v8_4_changelog.txt
+mycolab_code/lab4_code_copy/ip/data_ram/hdl/blk_mem_gen_v8_4_vhsyn_rfs.vhd
+mycolab_code/lab4_code_copy/ip/data_ram/misc/blk_mem_gen_v8_4.vhd
+mycolab_code/lab4_code_copy/ip/data_ram/sim/data_ram.v
+mycolab_code/lab4_code_copy/ip/data_ram/simulation/blk_mem_gen_v8_4.v
+mycolab_code/lab4_code_copy/ip/data_ram/synth/data_ram.vhd
+mycolab_code/lab4_code_copy/ip/instruction_memory/instruction_memory.xci

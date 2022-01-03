@@ -58,8 +58,7 @@ module ID(
     .wa3(MEM_WB_Rd),   
     .wd3(WBvalue),
     .rd1(RegReadData1),
-    .rd2(RegReadData2),
-    .in(RegAddr),.out(regout)
+    .rd2(RegReadData2)
     );
     
     sign_extend st(IF_ID_instr[15:0],immediate);

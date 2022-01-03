@@ -26,21 +26,15 @@ module mips(
 	input wire[31:0] instr,
 	output wire memwrite,
 	output wire[31:0] aluout,writedata,
-	input wire[31:0] readdata 
-
-    ,input [31:0] RegAddr,output [31:0] regout ,
-    input memCheck,
-    input [31:0]memAddr
+	input wire[31:0] readdata,
+	output [3:0] wea
     );
 	
 	wire Mem2Reg,ALUsrc,RegDst,RegWrite,Jump,PCsrc,zero,overflow;
 	wire[2:0] alucontrol;
 
-	//Controller c(instr[31:26],instr[5:0],zero,alucontrol,
-		//PCsrc, RegWrite, memwrite, MemRead,RegDst, ALUsrc, Mem2Reg, Beq, Jump);
-	datapath dp(clk,rst,overflow,zero,memwrite,PCout,instr,aluout,writedata,readdata
 
-    ,RegAddr,regout
-);
+	datapath dp(clk,rst,overflow,zero,memwrite,PCout,instr,aluout,writedata,readdata,wea
+				);
 	
 endmodule

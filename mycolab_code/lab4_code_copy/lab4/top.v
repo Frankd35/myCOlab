@@ -26,7 +26,9 @@ module top(
 	output memwrite
 	);
 	// wire clk;
-	wire[31:0] pc,instr,readdata,dataadr,writedata;
+	wire [31:0] pc,instr,readdata,dataadr,writedata;
+	wire [15:0] address;
+	wire [3:0] wea;
     wire memwrite;
 	//   clk_div instance_name(
  //    	// Clock out ports
@@ -36,7 +38,7 @@ module top(
  //    	); 
    	
 
-	mips mips(clk,rst,pc,instr,memwrite,dataadr,writedata,readdata);
+	mips mips(clk,rst,pc,instr,memwrite,dataadr,writedata,readdata,wea);
 	/*
 	mips(
 	input wire clk,rst,
@@ -57,12 +59,22 @@ module top(
     .douta(instr)  // output wire [31 : 0] douta
     );
 
-    blk_mem_gen_0 dm (
-    .clka(clk),    // input wire clka
-    .wea(memwrite),      // input wire [0 : 0] wea
-    .addra(dataadr),  // input wire [6 : 0] addra
-    .dina(writedata),    // input wire [31 : 0] dina
-    .douta(readdata)  // output wire [31 : 0] douta
-    );
+    // blk_mem_gen_0 dm (
+    // .clka(clk),    // input wire clka
+    // .wea(memwrite),      // input wire [0 : 0] wea
+    // .addra(dataadr),  // input wire [6 : 0] addra
+    // .dina(writedata),    // input wire [31 : 0] dina
+    // .douta(readdata)  // output wire [31 : 0] douta
+    // );
+
+	assign address = dataadr[17:2];
+	data_ram your_instance_name (
+	.clka(clk),    // input wire clka
+	.ena(memwrite),      // input wire ena
+	.wea(wea),      // input wire [3 : 0] wea
+	.addra(address),  // input wire [15 : 0] addra
+	.dina(writedata),    // input wire [31 : 0] dina
+	.douta(readdata)  // output wire [31 : 0] douta
+	);
 
 endmodule

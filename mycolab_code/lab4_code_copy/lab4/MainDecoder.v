@@ -45,8 +45,8 @@ module MainDecoder(
     (opcode == 6'b00_0000 & funct[5:2] == 4'b0100 & funct[0] == 1) ? 8'b1000_0000 : // mthi & mtlo
     (opcode == 6'b00_0000) ? 8'b1000_0010 : // R-type
     (opcode[5:3] == 3'b001) ? 8'b0100_0010 : // I-type
-    (opcode == 6'b10_1011) ? 8'b0100_1000 : // sw
-    (opcode == 6'b10_0011) ? 8'b0110_0110 : // lw
+    (opcode[5:3] == 3'b101) ? 8'b0100_1000 : // store
+    (opcode[5:3] == 3'b100) ? 8'b0110_0110 : // load
     (opcode == 6'b00_0100) ? 8'b0001_0000 : // beq
     (opcode[5:1] == 5'b00_001) ? 8'b0000_0001 : // j & jar
     0;                                          // default
