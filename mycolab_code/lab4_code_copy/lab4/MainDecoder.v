@@ -22,6 +22,7 @@
 
 module MainDecoder(
     input [5:0] opcode, funct,
+    input [4:0] rt,
     output RegWrite, MemWrite, MemRead,RegDst, ALUsrc, Mem2Reg, Beq, Jump, JumpV, Link
     );
     
@@ -47,9 +48,10 @@ module MainDecoder(
     (opcode[5:3] == 3'b001) ? 8'b0100_0010 : // I-type
     (opcode[5:3] == 3'b101) ? 8'b0100_1000 : // store
     (opcode[5:3] == 3'b100) ? 8'b0110_0110 : // load
+    ((opcode == 6'b000001) & rt[4]) ? 8'b1001_0010 : // branch and link
     ((opcode[5:2] == 4'b0001) | (opcode == 6'b000001)) ? 8'b1001_0000 : // branch
-    (opcode[5:1] == 5'b00_001) ? 8'b1000_0001 : // j
-    (opcode[5:1] == 5'b00_001) ? 8'b1000_0011 : // jal
+    (opcode == 5'b00_0010) ? 8'b1000_0001 : // j
+    (opcode == 5'b00_0011) ? 8'b1000_0011 : // jal
     0;                                          // default
     
     // unused signal

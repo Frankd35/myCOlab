@@ -113,7 +113,7 @@ module ID(
     assign Rs = IF_ID_instr[25:21];
     assign Rt = IF_ID_instr[20:16];
     assign Rd = ((alucontrol == `EXE_BGEZAL_OP) | (alucontrol == `EXE_BLTZAL_OP) | 
-                 (alucontrol == `EXE_JAL_OP) | (alucontrol == `EXE_JALR_OP)) ? 5'b11111 :
+                 (alucontrol == `EXE_JAL_OP)) ? 5'b11111 :
                  IF_ID_instr[15:11];
     assign shamt = IF_ID_instr[10:6];
 endmodule

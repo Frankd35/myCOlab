@@ -41,7 +41,7 @@ module Controller(
 
     // using shamt field for shift, ALUin0 takes shamt not R[rs]
     assign ShiftI = (opcode == 6'b00_0000) & ((funct == `SLL) | (funct == `SRL) | (funct == `SRA));
-    MainDecoder main_decoder(opcode,funct,RegWrite,MemWrite,MemRead,RegDst,ALUsrc,Mem2Reg,Beq,Jump,JumpV,Link);
+    MainDecoder main_decoder(opcode,funct,rt,RegWrite,MemWrite,MemRead,RegDst,ALUsrc,Mem2Reg,Beq,Jump,JumpV,Link);
     ALUcontrol alu_control(opcode,funct,rt,alucontrol);
     
 endmodule
