@@ -52,7 +52,7 @@ module ID(
     
     // regfile 
     regfile Reg(
-    .clk(clk),
+    .clk(clk),.rst(rst),
     .we3(MEM_WB_RegWrite),    // RegWrite signal
     .ra1(IF_ID_instr[25:21]),
     .ra2(IF_ID_instr[20:16]),
@@ -98,7 +98,7 @@ module ID(
     // WB control: Mem2Reg_ID,RegWrite_ID                   2bit
     // MEM control: memwrite_ID                             1bit
     // EX control: ALUsrc_ID,RegDst_ID,ShiftI_ID,alucontrol_ID        11bit
-    // flow control: jump,beq ---> 记得重命名                 2bit
+    // flow control: jump,beq ---> 记得重命�?                 2bit
     Mux #(15) mux_control_signals(
     .in0({Mem2Reg,RegWrite,MemWrite,ALUsrc,RegDst,ShiftI,alucontrol,jump_,Beq_}),
     .in1(0),
@@ -112,6 +112,8 @@ module ID(
     // output instruction fields
     assign Rs = IF_ID_instr[25:21];
     assign Rt = IF_ID_instr[20:16];
-    assign Rd = IF_ID_instr[15:11];
+    assign Rd = ((alucontrol == `EXE_BGEZAL_OP) | (alucontrol == `EXE_BLTZAL_OP) | 
+                 (alucontrol == `EXE_JAL_OP) | (alucontrol == `EXE_JALR_OP)) ? 5'b11111 :
+                 IF_ID_instr[15:11];
     assign shamt = IF_ID_instr[10:6];
 endmodule

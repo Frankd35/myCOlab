@@ -12,7 +12,7 @@ _start:
 
    .org 0x20
    addiu  $1,$1,0x0001   ## $1 = 0x3               
-   jal  0x40
+   jal  0x40             ## $31 = 0x2c
    nop
    addiu  $1,$1,0x0001   ## r1 = 0x4
    addiu  $1,$1,0x0001   ## r1 = 0x5
@@ -21,7 +21,7 @@ _start:
 
    .org 0x40
                
-   jalr $2,$31           
+   jalr $2,$31           ## target = 0x30, $2 = 0x48           
    or   $3,$2,$0          ## $3 = 0xb0000048
    addiu  $1,$1,0x0001    ## $1 = 0x8
    addiu  $1,$1,0x0001    ## $1 = 0x9
