@@ -39,13 +39,13 @@ module hilo (
     
 
     // create a latch here
-    always @(clk) begin            // 我不太确定这种写法会不会有问题，反正仿真能跑 tmd
+    always @(posedge clk) begin            // 我不太确定这种写法会不会有问题，反正仿真能跑 tmd
         if (rst)
             q <= 0;
-        else if (clk & result_ok) begin                 // posedge
+        else if (result_ok) begin                 // posedge
             q <= result;
         end
-        else if(~clk) begin                             // negedge
+        else begin                             // negedge
             case (alucontrol)
                 `EXE_MTHI_OP:   q[63:32] <= regin; 
                 `EXE_MTLO_OP:   q[31:0] <= regin; 
