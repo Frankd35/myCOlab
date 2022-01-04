@@ -29,7 +29,7 @@ module ID(
     input [3:0] forwardSignal,  // [3:2] for Reg[rs] and [1:0] for Reg[rt]
     input [31:0] IF_ID_instr,IF_ID_PCout,WBvalue,EX_MEM_aluout,
     input EX_MEM_branch_tacken,
-    output Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,ShiftI_ID,
+    output Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,ShiftI_ID,JumpV,
     output [7:0] alucontrol_ID,
     output branch,Beq,Jump,
     output [31:0] RegReadData1,RegReadData2,immediate,PCadd4,jumpAddr,branchAddr,

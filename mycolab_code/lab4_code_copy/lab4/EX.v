@@ -22,18 +22,21 @@
 
 module EX(
     input clk,rst,ALUsrc,
-    input RegDst,ID_EX_ShiftI,
+    input RegDst,ID_EX_ShiftI,ID_EX_JumpV,
     input [7:0] ID_EX_alucontrol,
     input [3:0] forwardSignal,  // [3:2] for Reg[rs] and [1:0] for Reg[rt]
     input [31:0] ID_EX_RegReadData1,ID_EX_RegReadData2,ID_EX_immediate,
-    input [31:0] EX_MEM_aluout,WBvalue,
+    input [31:0] EX_MEM_aluout,WBvalue,ID_EX_PCadd8,ID_EX_jumpAddr,
     input [4:0] ID_EX_Rt,ID_EX_Rd,ID_EX_shamt,
     output [31:0] out,
-    output [31:0] forwardRtData,
+    output [31:0] forwardRtData,jumpAddr_EX,
     output [4:0] Rd_EX,
     output result_notok
     );
     
+    // for jump register
+    assign jumpAddr_EX = ID_EX_JumpV ? forwardRsData : ID_EX_jumpAddr;
+
     
     // ALU source forward multiplexer
     wire [31:0] tmp,forwardRsData,forwardRtData,ID_EX_RegReadData1,ID_EX_RegReadData2,ALUin,hilo_out,ALUout;
@@ -119,7 +122,10 @@ module EX(
     .hilo_out(hilo_out)
     );
 
-    assign out = ((ID_EX_alucontrol == `EXE_MFHI_OP) | (ID_EX_alucontrol == `EXE_MFLO_OP)) ? hilo_out : ALUout;
+    assign out = ((ID_EX_alucontrol == `EXE_MFHI_OP) | (ID_EX_alucontrol == `EXE_MFLO_OP)) ? hilo_out :
+                 ((ID_EX_alucontrol == `EXE_BGEZAL_OP) | (ID_EX_alucontrol == `EXE_BLTZAL_OP) | 
+                 (ID_EX_alucontrol == `EXE_JAL_OP) | (ID_EX_alucontrol == `EXE_JALR_OP)) ? ID_EX_PCadd8 :
+                    ALUout;
     assign result_notok = (((ID_EX_alucontrol == `EXE_MULT_OP) | (ID_EX_alucontrol == `EXE_MULTU_OP)) & (~mult_result_ok)) |
                             (((ID_EX_alucontrol == `EXE_DIV_OP) | (ID_EX_alucontrol == `EXE_DIVU_OP)) & (~div_result_ok));
 

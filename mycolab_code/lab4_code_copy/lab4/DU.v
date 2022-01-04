@@ -9,7 +9,7 @@ module DU (
     output result_ok,
     output [63:0] result
 ); 
-    wire [31:0] A,B;
+    // wire [31:0] A,B;
     wire [63:0] P_signed, P_unsigned;
     wire data_ready,stall;
     reg [5:0] count = 0;
@@ -44,8 +44,8 @@ module DU (
 
     assign data_ready = (state == idle) & (next_state == lock);
     assign result_ok = (count == 32);
-    assign A = divisor[31] & (alucontrol == `EXE_DIV_OP) ? (~divisor + 1) : divisor;
-    assign B = dividend[31] & (alucontrol == `EXE_DIV_OP) ? (~dividend + 1) : dividend;
+    // assign A = divisor[31] & (alucontrol == `EXE_DIV_OP) ? (~divisor + 1) : divisor;
+    // assign B = dividend[31] & (alucontrol == `EXE_DIV_OP) ? (~dividend + 1) : dividend;
 
     wire [63:0] check;
     // assign check = sign ? {(~P[63:32] + 1),(~P[31:0] + 1)} : {P[63:32 ],P[31:0]};
@@ -54,8 +54,8 @@ module DU (
     div_radix2 udiv(
     clk,
     sclr,
-    B,  //dividend
-    A,  //divisor
+    dividend,  //dividend
+    divisor,  //divisor
     data_ready,
     0,   //1:signed
     stall,

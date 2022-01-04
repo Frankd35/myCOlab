@@ -36,9 +36,9 @@ module datapath(
     );
     
     // wire statement
-    wire stall_IF,stall_ID,stall_EX,Beq,branch,jump,ID_EX_Beq,ID_EX_jump,branch_tacken,EX_MEM_branch_taken; // control signals
+    wire stall_IF,stall_ID,stall_EX,Beq,branch,jump,ID_EX_Beq,ID_EX_jump,branch_tacken,EX_MEM_branch_taken,EX_MEM_branch_tacken; // control signals
     wire [31:0] PCadd4,jumpAddr,branchAddr,ID_EX_jumpAddr,ID_EX_branchAddr,PCout;   // between IF ID
-    wire [31:0] ALUout_EX,EX_MEM_ALUout,WBvalue,MEM_WB_writedata;  // forward datas
+    wire [31:0] ALUout_EX,EX_MEM_ALUout,WBvalue,MEM_WB_writedata,jumpAddr_EX;  // forward datas
     wire [3:0] forwardSignalID,forwardSignalEX;
     wire Gforward;
     wire [4:0] MEM_WB_Rd;   // WB 
@@ -54,8 +54,8 @@ module datapath(
     .stall(stall_IF),
     .branch(branch),
     .jump(ID_EX_jump), 
-    .PCadd4(PCadd4),
-    .jumpAddr(ID_EX_jumpAddr),
+    .PCadd4(PCadd4),                     
+    .jumpAddr(jumpAddr_EX),
     .branchAddr(ID_EX_branchAddr),
     .PCout(PCout)
     );
@@ -88,7 +88,7 @@ module datapath(
     .MEM_WB_RegWrite(MEM_WB_RegWrite),
     .MEM_WB_Rd(MEM_WB_Rd),
     .forwardSignal(forwardSignalID),  // [3:2] for Reg[rs] and [1:0] for Reg[rt]
-    .IF_ID_instr(IF_ID_instr),.IF_ID_PCout(IF_ID_PCout),.ShiftI_ID(ShiftI_ID),
+    .IF_ID_instr(IF_ID_instr),.IF_ID_PCout(IF_ID_PCout),.ShiftI_ID(ShiftI_ID),.JumpV(JumpV),
     .WBvalue(WBvalue),
     .EX_MEM_aluout(EX_MEM_ALUout),
     .EX_MEM_branch_tacken(EX_MEM_branch_tacken),
@@ -97,21 +97,22 @@ module datapath(
     .alucontrol_ID(alucontrol_ID),
     .branch(),.Jump(jump),.Beq(Beq),
     .RegReadData1(RegReadData1),.RegReadData2(RegReadData2),.immediate(immediate),
-    .PCadd4(PCadd4),.jumpAddr(jumpAddr),.branchAddr(branchAddr),
+    .PCadd4(PCadd4),    // actual is PC + 8, which PC refers to ID stage coresponding instruction
+    .jumpAddr(jumpAddr),.branchAddr(branchAddr),
     .Rs(Rs),.Rt(Rt),.Rd(Rd),.shamt(shamt)
     );    
     
     wire ID_EX_Mem2Reg,ID_EX_RegWrite,ID_EX_MemWrite,ID_EX_ALUsrc,ID_EX_RegDst;
     wire [7:0] ID_EX_alucontrol;
-    wire [31:0] ID_EX_RegReadData1,ID_EX_RegReadData2,ID_EX_immediate;
+    wire [31:0] ID_EX_RegReadData1,ID_EX_RegReadData2,ID_EX_immediate,ID_EX_PCadd8;
     wire [4:0] ID_EX_Rs,ID_EX_Rt,ID_EX_Rd,ID_EX_shamt;
     // ID/EX register
-    flopflip #(15)ID_EX_Controlsignal_resgister(
+    flopflip #(16)ID_EX_Controlsignal_resgister(
     .clk(clk),
     .rst(rst),
     .en(~stall_EX),
-    .in({Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,ShiftI_ID,alucontrol_ID,jump,Beq}),
-    .r({ID_EX_Mem2Reg,ID_EX_RegWrite,ID_EX_MemWrite,ID_EX_ALUsrc,ID_EX_RegDst,ID_EX_ShiftI,ID_EX_alucontrol,ID_EX_jump,ID_EX_Beq})
+    .in({Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,ShiftI_ID,alucontrol_ID,jump,Beq,JumpV}),
+    .r({ID_EX_Mem2Reg,ID_EX_RegWrite,ID_EX_MemWrite,ID_EX_ALUsrc,ID_EX_RegDst,ID_EX_ShiftI,ID_EX_alucontrol,ID_EX_jump,ID_EX_Beq,ID_EX_JumpV})
     );
     
     flopflip ID_EX_ReadData1_resgister(
@@ -154,6 +155,14 @@ module datapath(
     .r(ID_EX_branchAddr)
     );
     
+    flopflip ID_EX_PCadd4(
+    .clk(clk),
+    .rst(rst),
+    .en(~stall_EX),
+    .in(PCadd4),
+    .r(ID_EX_PCadd8)
+    );
+    
     flopflip #(19) ID_EX_instructionfield_resgister(
     .clk(clk),
     .rst(rst),
@@ -170,16 +179,17 @@ module datapath(
     //input
     clk,rst,
     ID_EX_ALUsrc,
-    ID_EX_RegDst,ID_EX_ShiftI,
+    ID_EX_RegDst,ID_EX_ShiftI,ID_EX_JumpV,
     ID_EX_alucontrol,
     forwardSignalEX,  // [3:2] for Reg[rs] and [1:0] for Reg[rt]
     ID_EX_RegReadData1,ID_EX_RegReadData2,ID_EX_immediate,
     EX_MEM_ALUout,
     WBvalue,
+    ID_EX_PCadd8,ID_EX_jumpAddr,
     ID_EX_Rt,ID_EX_Rd,ID_EX_shamt,
     // output
     ALUout_EX,
-    forwardRtData_EX,
+    forwardRtData_EX,jumpAddr_EX,
     Rd_EX,
     result_notok
     );
@@ -229,7 +239,7 @@ module datapath(
     .r(EX_MEM_alucontrol)
     );
 
-    wire [31:0] readdata_MEM,readdata_mask;
+    wire [31:0] readdata_MEM,readdata_mask;     // readdata_MEM unused
     // MEM stage
     assign MemAddr = EX_MEM_ALUout;
     assign writedata = (EX_MEM_alucontrol == `EXE_SW_OP) ?  EX_MEM_forwardRtData :

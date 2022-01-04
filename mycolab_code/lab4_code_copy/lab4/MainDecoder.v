@@ -48,9 +48,11 @@ module MainDecoder(
     (opcode[5:3] == 3'b101) ? 8'b0100_1000 : // store
     (opcode[5:3] == 3'b100) ? 8'b0110_0110 : // load
     ((opcode[5:2] == 4'b0001) | (opcode == 6'b000001)) ? 8'b1001_0000 : // branch
-    (opcode[5:1] == 5'b00_001) ? 8'b0000_0001 : // j & jar
+    (opcode[5:1] == 5'b00_001) ? 8'b1000_0001 : // j
+    (opcode[5:1] == 5'b00_001) ? 8'b1000_0011 : // jal
     0;                                          // default
     
+    // unused signal
     assign Link = (opcode == 6'b00_0000 & funct == 6'b00_1001) |    //jalr
                   (opcode == 6'b00_0011);                           // jal
     assign JumpV = (opcode == 6'b00_0000 & funct[5:1] == 5'b00100);   // jr & jalr
