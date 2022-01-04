@@ -36,23 +36,27 @@ module datapath(
     );
     
     // wire statement
-    wire stall_IF,stall_ID,stall_EX,Beq,branch,jump; // control signals
-    wire [31:0] PCadd4,jumpAddr,branchAddr,PCout,IF_ID_PCout_;   // between IF ID
-    wire [31:0] EX_MEM_ALUout,WBvalue,MEM_WB_writedata;  // forward datas
+    wire stall_IF,stall_ID,stall_EX,Beq,branch,jump,ID_EX_Beq,ID_EX_jump,branch_tacken,EX_MEM_branch_taken; // control signals
+    wire [31:0] PCadd4,jumpAddr,branchAddr,ID_EX_jumpAddr,ID_EX_branchAddr,PCout;   // between IF ID
+    wire [31:0] ALUout_EX,EX_MEM_ALUout,WBvalue,MEM_WB_writedata;  // forward datas
     wire [3:0] forwardSignalID,forwardSignalEX;
     wire Gforward;
     wire [4:0] MEM_WB_Rd;   // WB 
     wire MEM_WB_RegWrite;   // WB
+
+    assign branch = ID_EX_Beq & (ALUout_EX == 1);
+    assign branch_tacken = branch | ID_EX_jump;
+
     // IF stage
     IF IFstage(
     .clk(clk),
     .rst(rst),
     .stall(stall_IF),
     .branch(branch),
-    .jump(jump), 
+    .jump(ID_EX_jump), 
     .PCadd4(PCadd4),
-    .jumpAddr(jumpAddr),
-    .branchAddr(branchAddr),
+    .jumpAddr(ID_EX_jumpAddr),
+    .branchAddr(ID_EX_branchAddr),
     .PCout(PCout)
     );
     
@@ -87,10 +91,11 @@ module datapath(
     .IF_ID_instr(IF_ID_instr),.IF_ID_PCout(IF_ID_PCout),.ShiftI_ID(ShiftI_ID),
     .WBvalue(WBvalue),
     .EX_MEM_aluout(EX_MEM_ALUout),
+    .EX_MEM_branch_tacken(EX_MEM_branch_tacken),
     // output
     .Mem2Reg_ID(Mem2Reg_ID),.RegWrite_ID(RegWrite_ID),.MemWrite_ID(MemWrite_ID),.ALUsrc_ID(ALUsrc_ID),.RegDst_ID(RegDst_ID),
     .alucontrol_ID(alucontrol_ID),
-    .branch(branch),.Jump(jump),.Beq(Beq),
+    .branch(),.Jump(jump),.Beq(Beq),
     .RegReadData1(RegReadData1),.RegReadData2(RegReadData2),.immediate(immediate),
     .PCadd4(PCadd4),.jumpAddr(jumpAddr),.branchAddr(branchAddr),
     .Rs(Rs),.Rt(Rt),.Rd(Rd),.shamt(shamt)
@@ -101,12 +106,12 @@ module datapath(
     wire [31:0] ID_EX_RegReadData1,ID_EX_RegReadData2,ID_EX_immediate;
     wire [4:0] ID_EX_Rs,ID_EX_Rt,ID_EX_Rd,ID_EX_shamt;
     // ID/EX register
-    flopflip #(13)ID_EX_Controlsignal_resgister(
+    flopflip #(15)ID_EX_Controlsignal_resgister(
     .clk(clk),
     .rst(rst),
     .en(~stall_EX),
-    .in({Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,ShiftI_ID,alucontrol_ID}),
-    .r({ID_EX_Mem2Reg,ID_EX_RegWrite,ID_EX_MemWrite,ID_EX_ALUsrc,ID_EX_RegDst,ID_EX_ShiftI,ID_EX_alucontrol})
+    .in({Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,ShiftI_ID,alucontrol_ID,jump,Beq}),
+    .r({ID_EX_Mem2Reg,ID_EX_RegWrite,ID_EX_MemWrite,ID_EX_ALUsrc,ID_EX_RegDst,ID_EX_ShiftI,ID_EX_alucontrol,ID_EX_jump,ID_EX_Beq})
     );
     
     flopflip ID_EX_ReadData1_resgister(
@@ -131,6 +136,22 @@ module datapath(
     .en(~stall_EX),
     .in(immediate),
     .r(ID_EX_immediate)
+    );
+
+    flopflip ID_EX_jumpAddr_resgister(
+    .clk(clk),
+    .rst(rst),
+    .en(~stall_EX),
+    .in(jumpAddr),
+    .r(ID_EX_jumpAddr)
+    );
+    
+    flopflip ID_EX_branchAddr_resgister(
+    .clk(clk),
+    .rst(rst),
+    .en(~stall_EX),
+    .in(branchAddr),
+    .r(ID_EX_branchAddr)
     );
     
     flopflip #(19) ID_EX_instructionfield_resgister(
@@ -168,12 +189,12 @@ module datapath(
     wire [7:0] EX_MEM_alucontrol;
     wire [4:0] EX_MEM_Rd;
     // EX/MEM register
-    flopflip #(2) EX_MEM_controlsignal_register(
+    flopflip #(3) EX_MEM_controlsignal_register(
     .clk(clk),
     .rst(rst),
     .en(1),
-    .in({ID_EX_Mem2Reg,ID_EX_RegWrite,ID_EX_MemWrite}),
-    .r({EX_MEM_Mem2Reg,EX_MEM_RegWrite,EX_MEM_MemWrite})
+    .in({ID_EX_Mem2Reg,ID_EX_RegWrite,ID_EX_MemWrite,branch_tacken}),
+    .r({EX_MEM_Mem2Reg,EX_MEM_RegWrite,EX_MEM_MemWrite,EX_MEM_branch_tacken})
     );
     
     flopflip EX_MEM_ALUout_register(

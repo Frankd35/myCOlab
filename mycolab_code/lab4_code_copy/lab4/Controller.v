@@ -36,7 +36,9 @@ module Controller(
     assign funct = inst[5:0];
     assign rt = inst[20:16];
 
-    assign PCsrc = zero & Beq;
+    assign PCsrc = zero & Beq;  // not used
+
+
     // using shamt field for shift, ALUin0 takes shamt not R[rs]
     assign ShiftI = (opcode == 6'b00_0000) & ((funct == `SLL) | (funct == `SRL) | (funct == `SRA));
     MainDecoder main_decoder(opcode,funct,RegWrite,MemWrite,MemRead,RegDst,ALUsrc,Mem2Reg,Beq,Jump,JumpV,Link);

@@ -28,6 +28,7 @@ module ID(
     input [4:0] MEM_WB_Rd,
     input [3:0] forwardSignal,  // [3:2] for Reg[rs] and [1:0] for Reg[rt]
     input [31:0] IF_ID_instr,IF_ID_PCout,WBvalue,EX_MEM_aluout,
+    input EX_MEM_branch_tacken,
     output Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,ShiftI_ID,
     output [7:0] alucontrol_ID,
     output branch,Beq,Jump,
@@ -91,17 +92,20 @@ module ID(
     
     // controller
     Controller c(IF_ID_instr,zero,alucontrol,
-		PCsrc, RegWrite, MemWrite, MemRead,RegDst, ALUsrc, Mem2Reg, Beq, Jump, ShiftI, JumpV, Link);
+		PCsrc, RegWrite, MemWrite, MemRead,RegDst, ALUsrc, Mem2Reg, Beq_, jump_, ShiftI, JumpV, Link);
     
     // control signals 
     // WB control: Mem2Reg_ID,RegWrite_ID                   2bit
     // MEM control: memwrite_ID                             1bit
-    // EX control: ALUsrc_ID,RegDst_ID,ShiftI_ID,alucontrol_ID        9bit
-    Mux #(13) mux_control_signals(
-    .in0({Mem2Reg,RegWrite,MemWrite,ALUsrc,RegDst,ShiftI,alucontrol}),
+    // EX control: ALUsrc_ID,RegDst_ID,ShiftI_ID,alucontrol_ID        11bit
+    // flow control: jump,beq ---> 记得重命名                 2bit
+    Mux #(15) mux_control_signals(
+    .in0({Mem2Reg,RegWrite,MemWrite,ALUsrc,RegDst,ShiftI,alucontrol,jump_,Beq_}),
     .in1(0),
-    .signal(stall | (IF_ID_instr == 0)),
-    .out({Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,ShiftI_ID,alucontrol_ID})
+    // stall & nop instruction & IM[PC+8] which IM[PC] is a taken branck/jump
+    // should set their control signals to zero
+    .signal(stall | (IF_ID_instr == 0) | EX_MEM_branch_tacken),
+    .out({Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,ShiftI_ID,alucontrol_ID,Jump,Beq})
     );
     
     

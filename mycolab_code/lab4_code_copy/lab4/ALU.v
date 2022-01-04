@@ -68,14 +68,14 @@ module ALU(
         // (alucontrol == `EXE_JALR_OP) ? in0 + in1 :
         // (alucontrol == `EXE_JR_OP) ? in0 + in1 :
         
-        (alucontrol == `EXE_BEQ_OP) ? in0 + in1 :
-        (alucontrol == `EXE_BGEZ_OP) ? in0 + in1 :
+        (alucontrol == `EXE_BEQ_OP) ? (in0 == in1) :
+        (alucontrol == `EXE_BGEZ_OP) ? (($signed(in0) > 0) | (in0 == 0)):
         (alucontrol == `EXE_BGEZAL_OP) ? in0 + in1 :
         (alucontrol == `EXE_BGTZ_OP) ? in0 + in1 :
         (alucontrol == `EXE_BLEZ_OP) ? in0 + in1 :
         (alucontrol == `EXE_BLTZ_OP) ? in0 + in1 :
         (alucontrol == `EXE_BLTZAL_OP) ? in0 + in1 :
-        (alucontrol == `EXE_BNE_OP) ? in0 + in1 :
+        (alucontrol == `EXE_BNE_OP) ? (in0 != in1) :
 
         // do nothing here
         (alucontrol == `EXE_LB_OP) ? in0 + in1 :

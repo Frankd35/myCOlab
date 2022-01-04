@@ -47,7 +47,7 @@ module MainDecoder(
     (opcode[5:3] == 3'b001) ? 8'b0100_0010 : // I-type
     (opcode[5:3] == 3'b101) ? 8'b0100_1000 : // store
     (opcode[5:3] == 3'b100) ? 8'b0110_0110 : // load
-    (opcode == 6'b00_0100) ? 8'b0001_0000 : // beq
+    ((opcode[5:2] == 4'b0001) | (opcode == 6'b000001)) ? 8'b1001_0000 : // branch
     (opcode[5:1] == 5'b00_001) ? 8'b0000_0001 : // j & jar
     0;                                          // default
     

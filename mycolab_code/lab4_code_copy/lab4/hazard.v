@@ -36,9 +36,9 @@ module hazard(
 
     assign stall_ID = stall_EX |
     // for branch following R-type or lw
-    ( branch & ID_EX_RegWrite & (IF_ID_Rs == Rd_EX | IF_ID_Rt == Rd_EX)) |  
+    // ( branch & ID_EX_RegWrite & (IF_ID_Rs == Rd_EX | IF_ID_Rt == Rd_EX)) |  
     // for branch following lw(two circle)
-    ( branch & EX_MEM_Mem2Reg & (IF_ID_Rs == EX_MEM_Rd | IF_ID_Rt == EX_MEM_Rd)) |
+    // ( branch & EX_MEM_Mem2Reg & (IF_ID_Rs == EX_MEM_Rd | IF_ID_Rt == EX_MEM_Rd)) |
     // for read the register data after a lw using it
     (ID_EX_Mem2Reg & (IF_ID_Rs == Rd_EX | IF_ID_Rt == Rd_EX));
 
