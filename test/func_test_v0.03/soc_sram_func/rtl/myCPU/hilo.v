@@ -38,14 +38,14 @@ module hilo (
     // end
     
 
-    // create a latch here
-    always @(posedge clk) begin            // 我不太确定这种写法会不会有问题，反正仿真能跑 tmd
+    // hilo actually works on MEM stage
+    always @(posedge clk) begin            
         if (rst)
             q <= 0;
-        else if (result_ok) begin                 // posedge
+        else if (result_ok) begin                 
             q <= result;
         end
-        else begin                             // negedge
+        else begin                             
             case (alucontrol)
                 `EXE_MTHI_OP:   q[63:32] <= regin; 
                 `EXE_MTLO_OP:   q[31:0] <= regin; 

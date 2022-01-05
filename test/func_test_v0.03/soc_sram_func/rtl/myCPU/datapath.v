@@ -127,7 +127,7 @@ module datapath(
     // ID/EX register
     flopflip #(16)ID_EX_Controlsignal_resgister(
     .clk(clk),
-    .rst(rst),
+    .rst(rst), // | EX_MEM_branch_tacken),   flush PC+8 immediately
     .en(~stall_EX),
     .in({Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,ShiftI_ID,alucontrol_ID,jump,Beq,JumpV}),
     .r({ID_EX_Mem2Reg,ID_EX_RegWrite,ID_EX_MemWrite,ID_EX_ALUsrc,ID_EX_RegDst,ID_EX_ShiftI,ID_EX_alucontrol,ID_EX_jump,ID_EX_Beq,ID_EX_JumpV})
@@ -233,14 +233,23 @@ module datapath(
     wire [7:0] EX_MEM_alucontrol;
     wire [4:0] EX_MEM_Rd;
     // EX/MEM register
-    flopflip #(3) EX_MEM_controlsignal_register(
+    flopflip #(2) EX_MEM_controlsignal_register(
     .clk(clk),
     .rst(rst),
     .en(1),
-    .in({ID_EX_Mem2Reg,ID_EX_RegWrite,ID_EX_MemWrite,branch_tacken}),
-    .r({EX_MEM_Mem2Reg,EX_MEM_RegWrite,EX_MEM_MemWrite,EX_MEM_branch_tacken})
+    .in({ID_EX_Mem2Reg,ID_EX_RegWrite,ID_EX_MemWrite}),
+    .r({EX_MEM_Mem2Reg,EX_MEM_RegWrite,EX_MEM_MemWrite})
     );
     
+    // if delay slot stall at EX stage, branch tacken signal need special stall
+    flopflip #(0) EX_MEM_branch_tacken_control_register(
+    .clk(clk),
+    .rst(rst),
+    .en(~stall_EX),
+    .in(branch_tacken),
+    .r(EX_MEM_branch_tacken)
+    );
+
     flopflip EX_MEM_PCvalue_register(
     .clk(clk),
     .rst(rst),
@@ -304,34 +313,34 @@ module datapath(
 
     assign bit_off = MemAddr[1:0];
     assign bit_mask = (EX_MEM_alucontrol == `EXE_SW_OP) ? 4'b1111 :
-                      (EX_MEM_alucontrol == `EXE_SH_OP) ? (bit_off[1] ? 4'b0011 : 4'b1100) :
+                      (EX_MEM_alucontrol == `EXE_SH_OP) ? (bit_off[1] ? 4'b1100 : 4'b0011) :
                       (EX_MEM_alucontrol == `EXE_SB_OP) ?
                       (
-                          (bit_off == 2'b00) ? 4'b1000 :  
-                          (bit_off == 2'b01) ? 4'b0100 :
-                          (bit_off == 2'b10) ? 4'b0010 :
-                          (bit_off == 2'b11) ? 4'b0001 : 4'b0000
+                          (bit_off == 2'b11) ? 4'b1000 :  
+                          (bit_off == 2'b10) ? 4'b0100 :
+                          (bit_off == 2'b01) ? 4'b0010 :
+                          (bit_off == 2'b00) ? 4'b0001 : 4'b0000
                       ) : 4'b0000;                      // lw & lh & lb
 
 
     assign readdata_mask = (EX_MEM_alucontrol == `EXE_LW_OP) ? readdata : 
                            (EX_MEM_alucontrol == `EXE_LH_OP)? ( 
-                               bit_off[1] ? {{16{readdata[15]}},readdata[15:0]} : {{16{readdata[31]}},readdata[31:16]}
+                               ~bit_off[1] ? {{16{readdata[15]}},readdata[15:0]} : {{16{readdata[31]}},readdata[31:16]}
                            ) :
                            (EX_MEM_alucontrol == `EXE_LHU_OP) ? ( 
-                               bit_off[1] ? {16'b0,readdata[15:0]} : {16'b0,readdata[31:16]}
+                               ~bit_off[1] ? {16'b0,readdata[15:0]} : {16'b0,readdata[31:16]}
                            ) :
                            (EX_MEM_alucontrol == `EXE_LB_OP) ? (
-                               (bit_off == 2'b11) ? {{24{readdata[7]}},readdata[7:0]} :
-                               (bit_off == 2'b10) ? {{24{readdata[15]}},readdata[15:8]} :
-                               (bit_off == 2'b01) ? {{24{readdata[23]}},readdata[23:16]} :
-                               (bit_off == 2'b00) ? {{24{readdata[31]}},readdata[31:24]} : 0
+                               (bit_off == 2'b00) ? {{24{readdata[7]}},readdata[7:0]} :
+                               (bit_off == 2'b01) ? {{24{readdata[15]}},readdata[15:8]} :
+                               (bit_off == 2'b10) ? {{24{readdata[23]}},readdata[23:16]} :
+                               (bit_off == 2'b11) ? {{24{readdata[31]}},readdata[31:24]} : 0
                            ) :
                            (EX_MEM_alucontrol == `EXE_LBU_OP) ? (
-                               (bit_off == 2'b11) ? {24'b0,readdata[7:0]} :
-                               (bit_off == 2'b10) ? {24'b0,readdata[15:8]} :
-                               (bit_off == 2'b01) ? {24'b0,readdata[23:16]} :
-                               (bit_off == 2'b00) ? {24'b0,readdata[31:24]} : 0
+                               (bit_off == 2'b00) ? {24'b0,readdata[7:0]} :
+                               (bit_off == 2'b01) ? {24'b0,readdata[15:8]} :
+                               (bit_off == 2'b10) ? {24'b0,readdata[23:16]} :
+                               (bit_off == 2'b11) ? {24'b0,readdata[31:24]} : 0
                            ) : 0;
 
 
