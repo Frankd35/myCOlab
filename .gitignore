@@ -3,7 +3,11 @@ project/
 C_O_D_lab4.gen/
 
 # 暂时不需要的测试文件
-test/func_test_v0.03/
+test/func_test_v0.03/project_1.gen
+test/func_test_v0.03/soft/
+test/func_test_v0.03/cpu132_gettrace
+test/func_test_v0.03/soc_axi_func
+test/func_test_v0.03/soc_sram_func/run_vivado/mycpu_prj1/
 test/perf_test_v0.01/
 test/n4ddr/
 
@@ -24,4 +28,5 @@ mycolab_code/lab4_code_copy/ip/data_ram/misc/blk_mem_gen_v8_4.vhd
 mycolab_code/lab4_code_copy/ip/data_ram/sim/data_ram.v
 mycolab_code/lab4_code_copy/ip/data_ram/simulation/blk_mem_gen_v8_4.v
 mycolab_code/lab4_code_copy/ip/data_ram/synth/data_ram.vhd
+mycolab_code/lab4_code_copy/ip/instruction_memory/instruction_memory.xci
 mycolab_code/lab4_code_copy/ip/instruction_memory/instruction_memory.xci

@@ -44,6 +44,9 @@ module datapath(
     wire [4:0] MEM_WB_Rd;   // WB 
     wire MEM_WB_RegWrite;   // WB
 
+    // trace debug signal
+    // wire [31:0] ID_EX_PC,EX_MEM_PC_
+
     assign branch = ID_EX_Beq & (ALUout_EX == 1);
     assign branch_tacken = branch | ID_EX_jump;
 
@@ -115,6 +118,14 @@ module datapath(
     .r({ID_EX_Mem2Reg,ID_EX_RegWrite,ID_EX_MemWrite,ID_EX_ALUsrc,ID_EX_RegDst,ID_EX_ShiftI,ID_EX_alucontrol,ID_EX_jump,ID_EX_Beq,ID_EX_JumpV})
     );
     
+    // flopflip ID_EX_PC_register(
+    // .clk(clk),
+    // .rst(rst),
+    // .en(~stall_EX),
+    // .in(RegReadData1),
+    // .r(ID_EX_RegReadData1)
+    // );
+
     flopflip ID_EX_ReadData1_resgister(
     .clk(clk),
     .rst(rst),
