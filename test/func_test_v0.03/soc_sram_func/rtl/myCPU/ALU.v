@@ -107,8 +107,8 @@ module ALU(
 
     // double signed bit
     assign extra = 
-    ((alucontrol == `ADD) | (alucontrol == `ADDI)) ? {in0[31],in0} + {in1[31],in1} : 
-    (alucontrol == `SUB)? {in0[31],in0} - {in1[31],in1} :
+    ((alucontrol == `EXE_ADD_OP) | (alucontrol == `EXE_ADDI_OP)) ? {in0[31],in0} + {in1[31],in1} : 
+    (alucontrol == `EXE_SUB_OP)? {in0[31],in0} - {in1[31],in1} :
     0;
     
     assign overflow = extra[31] ^ extra[32];

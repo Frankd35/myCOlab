@@ -43,19 +43,13 @@ module IF(
                   branch ? branchAddr :
                   PCoutAdd4;
 
-    assign PC_EXP = ~(PCin[1:0] == 2'b00);
-    // Mux3 pcin(
-    // .in0(PCoutAdd4),
-    // .in1(branchAddr),
-    // .in2(jumpAddr),
-    // .signal({jump,branch}),
-    // .out(PCin)
-    // );
+    assign PC_EXP = ~(PCout[1:0] == 2'b00);
+    
         
     PC pc(
     .clk(clk),
     .rst(rst),  // ͬ����λ
-    .en(~stall),
+    .en(~stall | exp_handle),       // exceptio has higher priority
     .inst_addr(PCin),
     .addr(PCout)
     );

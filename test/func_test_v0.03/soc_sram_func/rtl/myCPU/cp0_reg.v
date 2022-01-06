@@ -90,6 +90,10 @@ module cp0_reg(
 				endcase
 			end
 			case (excepttype_i)
+				32'h00000000:begin		// software interrupt
+					// only after MTCP0 instruction
+					epc_o <= current_inst_addr_i + 4;
+				end
 				32'h00000001:begin 
 					if(is_in_delayslot_i == `InDelaySlot) begin
 						/* code */

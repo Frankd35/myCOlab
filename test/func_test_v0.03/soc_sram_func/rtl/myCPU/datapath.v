@@ -375,7 +375,8 @@ module datapath(
     wire [1:0] bit_off;
 
     assign bit_off = MemAddr[1:0];
-    assign bit_mask = (EX_MEM_alucontrol == `EXE_SW_OP) ? 4'b1111 :
+    assign bit_mask = WA_EXP ? 4'b000 :                                 // write address exception should not write
+                      (EX_MEM_alucontrol == `EXE_SW_OP) ? 4'b1111 :
                       (EX_MEM_alucontrol == `EXE_SH_OP) ? (bit_off[1] ? 4'b1100 : 4'b0011) :
                       (EX_MEM_alucontrol == `EXE_SB_OP) ?
                       (
@@ -417,17 +418,33 @@ module datapath(
                     0;
 
     // exception & iterrupt handling at MEM stage
-    wire [31:0] status;
-    assign exp_handle = EX_MEM_PC_EXP | EX_MEM_SYSC_EXP | EX_MEM_BREAK_EXP | EX_MEM_RI_EXP | EX_MEM_OV_EXP | 
-                        RA_EXP | WA_EXP;
+    wire [31:0] cause,status,exp_code;
     
-    assign exp_code = EX_MEM_PC_EXP | RA_EXP ? 32'h00000004 :
+    // detect posedge of software interrput signal
+    wire old_sftw_itrpt, new_sftw_itrpt,SW_INT;
+    assign SW_INT = (new_sftw_itrpt == 1 & old_sftw_itrpt == 0);
+    assign new_sftw_itrpt = |(status[9:8] & cause[9:8]) & status[1] == 0;
+    flopflip #(0) software_interrput_register(
+    .clk(clk),
+    .rst(rst),
+    .en(1),
+    .in(new_sftw_itrpt),      
+    .r(old_sftw_itrpt)           // older 1 CC
+    );
+
+    
+    assign exp_handle = EX_MEM_PC_EXP | EX_MEM_SYSC_EXP | EX_MEM_BREAK_EXP | EX_MEM_RI_EXP | EX_MEM_OV_EXP | 
+                        RA_EXP | WA_EXP | SW_INT;
+    
+    assign exp_code = ERET ? 32'h0000000e :                                     // eret has best priority
+                      SW_INT ? 32'h00000000 :
+                      EX_MEM_PC_EXP | RA_EXP ? 32'h00000004 :
                       EX_MEM_RI_EXP ? 32'h0000000a :
                       EX_MEM_OV_EXP ? 32'h0000000c :
                       (EX_MEM_BREAK_EXP & status[1] == 0) ? 32'h00000009 :
                       (EX_MEM_SYSC_EXP & status[1] == 0) ? 32'h00000008 :
                       WA_EXP ? 32'h00000005 :
-                      0;
+                      32'hffff_ffff;    // default, do not thing here
 
     assign bad_addr =  EX_MEM_PC_EXP ? EX_MEM_PC :
                        RA_EXP | WA_EXP ? MemAddr :
@@ -448,7 +465,7 @@ module datapath(
     .epc_o(epc),
     
     // do not implement this function
-    .count_o(),.compare_o(),.status_o(status),.cause_o(),.config_o(),.prid_o(),.badvaddr()
+    .count_o(),.compare_o(),.status_o(status),.cause_o(cause),.config_o(),.prid_o(),.badvaddr()
     );
 
 
