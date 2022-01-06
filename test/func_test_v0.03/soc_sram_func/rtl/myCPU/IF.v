@@ -26,21 +26,31 @@ module IF(
     input stall,
     input branch,
     input jump, 
+    input exp_handle,ERET,
     input [31:0] PCadd4,
     input [31:0] jumpAddr,
-    input [31:0] branchAddr,
-    output [31:0] PCout
+    input [31:0] branchAddr,epc,
+    output [31:0] PCout,
+    output PC_EXP
     );
     wire [31:0] PCin,PCoutAdd4;
     
     assign PCoutAdd4 = PCout+4;
-    Mux3 pcin(
-    .in0(PCoutAdd4),
-    .in1(branchAddr),
-    .in2(jumpAddr),
-    .signal({jump,branch}),
-    .out(PCin)
-    );
+
+    assign PCin = exp_handle ? 32'hbfc0_0380 :      // best priority
+                  ERET ? epc :
+                  jump ? jumpAddr :
+                  branch ? branchAddr :
+                  PCoutAdd4;
+
+    assign PC_EXP = ~(PCin[1:0] == 2'b00);
+    // Mux3 pcin(
+    // .in0(PCoutAdd4),
+    // .in1(branchAddr),
+    // .in2(jumpAddr),
+    // .signal({jump,branch}),
+    // .out(PCin)
+    // );
         
     PC pc(
     .clk(clk),

@@ -28,6 +28,7 @@ module EX(
     input [31:0] ID_EX_RegReadData1,ID_EX_RegReadData2,ID_EX_immediate,
     input [31:0] EX_MEM_aluout,WBvalue,ID_EX_PCadd8,ID_EX_jumpAddr,
     input [4:0] ID_EX_Rt,ID_EX_Rd,ID_EX_shamt,
+    output overflow,
     output [31:0] out,
     output [31:0] forwardRtData,jumpAddr_EX,
     output [4:0] Rd_EX,
@@ -80,7 +81,8 @@ module EX(
     .shamt(shamt),
     .alucontrol(ID_EX_alucontrol),
     .out(ALUout),
-    .zero(),.overflow() // do no use
+    .zero(), // do no use
+    .overflow(overflow)
     );
     
     // MU

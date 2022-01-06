@@ -37,11 +37,11 @@ module mips(
 	wire [39:0] ASCII;
 	instdec dec(instr,ASCII);
 
-	wire Mem2Reg,ALUsrc,RegDst,RegWrite,Jump,PCsrc,zero,overflow;
+	wire Mem2Reg,ALUsrc,RegDst,RegWrite,Jump,PCsrc;
 	
 
 
-	datapath dp(clk,rst,overflow,zero,memwrite,PCout,instr,aluout,writedata,readdata,wea,
+	datapath dp(clk,rst,memwrite,PCout,instr,aluout,writedata,readdata,wea,
 				debug_wb_pc,debug_wb_rf_wen,debug_wb_rf_wnum,debug_wb_rf_wdata
 				);
 	

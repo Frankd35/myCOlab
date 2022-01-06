@@ -33,7 +33,8 @@ module ID(
     output [7:0] alucontrol_ID,
     output branch,Beq,Jump,
     output [31:0] RegReadData1,RegReadData2,immediate,PCadd4,jumpAddr,branchAddr,
-    output [4:0] Rs,Rt,Rd,shamt
+    output [4:0] Rs,Rt,Rd,shamt,
+    output SYSC_EXP,BREAK_EXP,RI_EXP,MFCP0,MTCP0
     );    
     wire Mem2Reg,RegWrite,MemWrite,ALUsrc,RegDst,Beq,Jump,ShiftI,JumpV,Link;   // control signals
     wire [7:0] alucontrol;      // control signals
@@ -92,29 +93,36 @@ module ID(
     
     
     // controller
+    wire SYSC_EXP_,BREAK_EXP_,RI_EXP_,MFCP0_,MTCP0_,Beq_,jump_;
     Controller c(IF_ID_instr,zero,alucontrol,
-		PCsrc, RegWrite, MemWrite, MemRead,RegDst, ALUsrc, Mem2Reg, Beq_, jump_, ShiftI, JumpV, Link);
+		PCsrc, RegWrite, MemWrite, MemRead,RegDst, ALUsrc, Mem2Reg, Beq_, jump_, ShiftI, JumpV, Link,
+    SYSC_EXP_,BREAK_EXP_,RI_EXP_,MFCP0_,MTCP0_
+    );
     
     // control signals 
     // WB control: Mem2Reg_ID,RegWrite_ID                   2bit
     // MEM control: memwrite_ID                             1bit
     // EX control: ALUsrc_ID,RegDst_ID,ShiftI_ID,alucontrol_ID        11bit
     // flow control: jump,beq ---> 记得重命�?                 2bit
-    Mux #(15) mux_control_signals(
-    .in0({Mem2Reg,RegWrite,MemWrite,ALUsrc,RegDst,ShiftI,alucontrol,jump_,Beq_}),
+    // EXP decode 3bit
+    // mf/mt cp0 2bit
+    Mux #(20) mux_control_signals(
+    .in0({Mem2Reg,RegWrite,MemWrite,ALUsrc,RegDst,ShiftI,alucontrol,jump_,Beq_,
+          SYSC_EXP_,BREAK_EXP_,RI_EXP_,MFCP0_,MTCP0_}),
     .in1(0),
     // stall & nop instruction & IM[PC+8] which IM[PC] is a taken branck/jump
     // should set their control signals to zero
     .signal(stall | (IF_ID_instr == 0) | EX_MEM_branch_tacken),
-    .out({Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,ShiftI_ID,alucontrol_ID,Jump,Beq})
+    .out({Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,ShiftI_ID,alucontrol_ID,Jump,Beq,
+          SYSC_EXP,BREAK_EXP,RI_EXP,MFCP0,MTCP0})
     );
     
     
     // output instruction fields
     assign Rs = IF_ID_instr[25:21];
-    assign Rt = IF_ID_instr[20:16];
+    assign Rt = MFCP0 ? IF_ID_instr[15:11] : IF_ID_instr[20:16];
     assign Rd = ((alucontrol == `EXE_BGEZAL_OP) | (alucontrol == `EXE_BLTZAL_OP) | 
                  (alucontrol == `EXE_JAL_OP)) ? 5'b11111 :
-                 IF_ID_instr[15:11];
+                 MFCP0 ? IF_ID_instr[20:16] : IF_ID_instr[15:11];
     assign shamt = IF_ID_instr[10:6];
 endmodule

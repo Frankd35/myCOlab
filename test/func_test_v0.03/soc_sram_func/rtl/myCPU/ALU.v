@@ -33,16 +33,12 @@ module ALU(
     wire [32:0] extra;
 
 
-    // fucking shift
+    // fucking shift, don't how it breaks
+    // but this can work
     wire[31:0] asr_result,sl_result,sr_result;
     assign sl_result = in1 << shamt;
     assign sr_result = in1 >> shamt;
     assign asr_result = $signed(in1) >>> shamt;
-
-    // i know why 
-    // wire [31:0] lez;
-    // assign lez = ($signed(in0) > 0) ? 0 : 1;
-
 
     // combinational logic
     assign out = 

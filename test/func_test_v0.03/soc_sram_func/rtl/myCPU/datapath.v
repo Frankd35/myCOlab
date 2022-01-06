@@ -24,7 +24,6 @@
 
 module datapath(
     input clk,rst,
-    output overflow,zero,
     output EX_MEM_MemWrite,
     output [31:0] PCout,
     input [31:0] instr,
@@ -54,7 +53,7 @@ module datapath(
     instdec dec_WB(MEM_WB_instr,WB_instr_);
 
     // wire statement
-    wire stall_IF,stall_ID,stall_EX,Beq,branch,jump,ID_EX_Beq,ID_EX_jump,branch_tacken,ALUoutEONE,EX_MEM_branch_taken,EX_MEM_branch_tacken; // control signals
+    wire stall_IF,stall_ID,stall_EX,Beq,branch,jump,ID_EX_Beq,ID_EX_jump,branch_tacken,ALUoutEONE,EX_MEM_branch_tacken; // control signals
     wire [31:0] PCadd4,jumpAddr,branchAddr,ID_EX_jumpAddr,ID_EX_branchAddr,PCout;   // between IF ID
     wire [31:0] ALUout_EX,EX_MEM_ALUout,WBvalue,MEM_WB_writedata,jumpAddr_EX;  // forward datas
     wire [3:0] forwardSignalID,forwardSignalEX;
@@ -62,8 +61,19 @@ module datapath(
     wire [4:0] MEM_WB_Rd;   // WB 
     wire MEM_WB_RegWrite;   // WB
 
+
     assign branch = ID_EX_Beq & ALUoutEONE;
     assign branch_tacken = branch | ID_EX_jump;
+
+    // exception and interrupt
+    wire SYSC_EXP,BREAK_EXP,RI_EXP,PC_EXP,OV_EXP,HW_INT,RA_EXP,WA_EXP,exp_handle;
+    wire IF_ID_PC_EXP;                                                                      // IF_ID
+    wire ID_EX_PC_EXP,ID_EX_SYSC_EXP,ID_EX_BREAK_EXP,ID_EX_RI_EXP;                          // ID_EX
+    wire EX_MEM_PC_EXP,EX_MEM_SYSC_EXP,EX_MEM_BREAK_EXP,EX_MEM_RI_EXP,EX_MEM_OV_EXP;        // EX_MEM
+    wire MTCP0,MFCP0,ID_EX_MTCP0,ID_EX_MFCP0;
+    wire ERET,ID_EX_ERET;
+    wire ID_EX_isdelayslot,EX_MEM_isdelayslot;
+    wire [31:0] bad_addr,epc;
 
     // IF stage
     IF IFstage(
@@ -71,23 +81,37 @@ module datapath(
     .rst(rst),
     .stall(stall_IF),
     .branch(branch),
+    .exp_handle(exp_handle),.ERET(ERET),
     .jump(ID_EX_jump), 
     .PCadd4(PCadd4),                     
     .jumpAddr(jumpAddr_EX),
-    .branchAddr(ID_EX_branchAddr),
-    .PCout(PCout)
+    .branchAddr(ID_EX_branchAddr),.epc(epc),
+    .PCout(PCout),
+    .PC_EXP(PC_EXP)
     );
     
     wire [31:0] IF_ID_PCout;
+
     // IF/ID registers
+    flopflip #(0) IF_ID_EXP_register(
+    .clk(clk),
+    .rst(rst | exp_handle),
+    .en(~stall_ID),
+    .in(PC_EXP),
+    .r(IF_ID_PC_EXP)
+    );
+    
+
     flopflip IF_ID_instr_register(
     .clk(clk),
-    .rst(rst),
+    .rst(rst | exp_handle | ERET),
     .en(~stall_ID),
     .in(instr),
     .r(IF_ID_instr)
     );
     
+    assign ERET = (instr == 32'b01000010000000000000000000011000);
+
     flopflip IF_ID_PCvalue_register(
     .clk(clk),
     .rst(rst),
@@ -117,20 +141,42 @@ module datapath(
     .RegReadData1(RegReadData1),.RegReadData2(RegReadData2),.immediate(immediate),
     .PCadd4(PCadd4),    // actual is PC + 8, which PC refers to ID stage coresponding instruction
     .jumpAddr(jumpAddr),.branchAddr(branchAddr),
-    .Rs(Rs),.Rt(Rt),.Rd(Rd),.shamt(shamt)
+    .Rs(Rs),.Rt(Rt),.Rd(Rd),.shamt(shamt),
+    .SYSC_EXP(SYSC_EXP),.BREAK_EXP(BREAK_EXP),.RI_EXP(RI_EXP),
+    .MFCP0(MFCP0),.MTCP0(MTCP0)
     );    
     
     wire ID_EX_Mem2Reg,ID_EX_RegWrite,ID_EX_MemWrite,ID_EX_ALUsrc,ID_EX_RegDst;
     wire [7:0] ID_EX_alucontrol;
     wire [31:0] ID_EX_RegReadData1,ID_EX_RegReadData2,ID_EX_immediate,ID_EX_PCadd8;
     wire [4:0] ID_EX_Rs,ID_EX_Rt,ID_EX_Rd,ID_EX_shamt;
+    
     // ID/EX register
-    flopflip #(16)ID_EX_Controlsignal_resgister(
+    flopflip #(3)ID_EX_EXP_resgister(
     .clk(clk),
-    .rst(rst), // | EX_MEM_branch_tacken),   flush PC+8 immediately
+    .rst(rst | exp_handle), 
     .en(~stall_EX),
-    .in({Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,ShiftI_ID,alucontrol_ID,jump,Beq,JumpV}),
-    .r({ID_EX_Mem2Reg,ID_EX_RegWrite,ID_EX_MemWrite,ID_EX_ALUsrc,ID_EX_RegDst,ID_EX_ShiftI,ID_EX_alucontrol,ID_EX_jump,ID_EX_Beq,ID_EX_JumpV})
+    .in({IF_ID_PC_EXP,SYSC_EXP,BREAK_EXP,RI_EXP}),
+    .r({ID_EX_PC_EXP,ID_EX_SYSC_EXP,ID_EX_BREAK_EXP,ID_EX_RI_EXP})
+    );
+    
+    flopflip #(0)ID_EX_isdelayslot_resgister(
+    .clk(clk),
+    .rst(rst | exp_handle), 
+    .en(~stall_EX),
+    .in(ID_EX_jump | ID_EX_Beq),
+    .r(ID_EX_isdelayslot)
+    );
+
+    flopflip #(18)ID_EX_Controlsignal_resgister(
+    .clk(clk),
+    .rst(rst | exp_handle), 
+    .en(~stall_EX),
+    .in({Mem2Reg_ID,RegWrite_ID,MemWrite_ID,ALUsrc_ID,RegDst_ID,
+        ShiftI_ID,alucontrol_ID,jump,Beq,JumpV,MTCP0,MFCP0}),
+    .r({ID_EX_Mem2Reg,ID_EX_RegWrite,ID_EX_MemWrite,ID_EX_ALUsrc,ID_EX_RegDst,
+        ID_EX_ShiftI,ID_EX_alucontrol,ID_EX_jump,ID_EX_Beq,ID_EX_JumpV,
+        ID_EX_MTCP0,ID_EX_MFCP0})
     );
     
     flopflip ID_EX_PCvalue_register(
@@ -222,6 +268,7 @@ module datapath(
     ID_EX_PCadd8,ID_EX_jumpAddr,
     ID_EX_Rt,ID_EX_Rd,ID_EX_shamt,
     // output
+    overflow,
     ALUout_EX,
     forwardRtData_EX,jumpAddr_EX,
     Rd_EX,
@@ -232,10 +279,27 @@ module datapath(
     wire [31:0] EX_MEM_forwardRtData;
     wire [7:0] EX_MEM_alucontrol;
     wire [4:0] EX_MEM_Rd;
+    
     // EX/MEM register
+    flopflip #(4) EX_MEM_EXP_register(
+    .clk(clk),
+    .rst(rst | exp_handle),
+    .en(~stall_EX),
+    .in({ID_EX_PC_EXP,ID_EX_SYSC_EXP,ID_EX_BREAK_EXP,ID_EX_RI_EXP,overflow}),
+    .r({EX_MEM_PC_EXP,EX_MEM_SYSC_EXP,EX_MEM_BREAK_EXP,EX_MEM_RI_EXP,EX_MEM_OV_EXP})
+    );
+    
+    flopflip #(0) EX_MEM_isdelayslot_register(
+    .clk(clk),
+    .rst(rst | exp_handle),
+    .en(1),
+    .in(ID_EX_isdelayslot),
+    .r(EX_MEM_isdelayslot)
+    );
+
     flopflip #(2) EX_MEM_controlsignal_register(
     .clk(clk),
-    .rst(rst),
+    .rst(rst | exp_handle),
     .en(1),
     .in({ID_EX_Mem2Reg,ID_EX_RegWrite,ID_EX_MemWrite}),
     .r({EX_MEM_Mem2Reg,EX_MEM_RegWrite,EX_MEM_MemWrite})
@@ -244,12 +308,12 @@ module datapath(
     // if delay slot stall at EX stage, branch tacken signal need special stall
     flopflip #(0) EX_MEM_branch_tacken_control_register(
     .clk(clk),
-    .rst(rst),
+    .rst(rst | exp_handle),
     .en(~stall_EX),
     .in(branch_tacken),
     .r(EX_MEM_branch_tacken)
     );
-
+ 
     flopflip EX_MEM_PCvalue_register(
     .clk(clk),
     .rst(rst),
@@ -266,11 +330,13 @@ module datapath(
     .r(EX_MEM_instr)
     );
 
+    wire [31:0] cp0out, ALUout_mux;
+    assign ALUout_mux = ID_EX_MFCP0 ? cp0out : ALUout_EX;
     flopflip EX_MEM_ALUout_register(
     .clk(clk),
     .rst(rst),
     .en(1),
-    .in(ALUout_EX),
+    .in(ALUout_mux),
     .r(EX_MEM_ALUout)
     );
     
@@ -292,7 +358,7 @@ module datapath(
     
     flopflip #(7) EX_MEM_alucontrol_register(
     .clk(clk),
-    .rst(rst),
+    .rst(rst | exp_handle),
     .en(1),
     .in(ID_EX_alucontrol),
     .r(EX_MEM_alucontrol)
@@ -305,9 +371,6 @@ module datapath(
                        (EX_MEM_alucontrol == `EXE_SH_OP) ? {2{EX_MEM_forwardRtData[15:0]}} : 
                        (EX_MEM_alucontrol == `EXE_SB_OP) ? {4{EX_MEM_forwardRtData[7:0]}} :
                        32'b0000;
-
-    // EX_MEM_forwardRtData;
-        
     
     wire [1:0] bit_off;
 
@@ -324,7 +387,7 @@ module datapath(
 
 
     assign readdata_mask = (EX_MEM_alucontrol == `EXE_LW_OP) ? readdata : 
-                           (EX_MEM_alucontrol == `EXE_LH_OP)? ( 
+                           (EX_MEM_alucontrol == `EXE_LH_OP) ? ( 
                                ~bit_off[1] ? {{16{readdata[15]}},readdata[15:0]} : {{16{readdata[31]}},readdata[31:16]}
                            ) :
                            (EX_MEM_alucontrol == `EXE_LHU_OP) ? ( 
@@ -343,21 +406,60 @@ module datapath(
                                (bit_off == 2'b11) ? {24'b0,readdata[31:24]} : 0
                            ) : 0;
 
+    assign RA_EXP = (EX_MEM_alucontrol == `EXE_LH_OP) | (EX_MEM_alucontrol == `EXE_LHU_OP) ? (
+                    bit_off[0] == 1 ? 1 : 0
+                    ) :
+                    (EX_MEM_alucontrol == `EXE_LW_OP) ? (bit_off == 2'b00 ? 0 : 1) :
+                    0;
+                    
+    assign WA_EXP = (EX_MEM_alucontrol == `EXE_SW_OP) ? (bit_off == 2'b00 ? 0 : 1) :
+                    (EX_MEM_alucontrol == `EXE_SH_OP) ? (bit_off[0] == 1 ? 1 : 0) :
+                    0;
 
-    /*Mux Mux_MEM_WB_readdata(
-    .in0(readdate),
-    .in1(MEM_WB_writedata),
-    .signal(Gforward),
-    .out(readdata_MEM)
-    );*/
+    // exception & iterrupt handling at MEM stage
+    wire [31:0] status;
+    assign exp_handle = EX_MEM_PC_EXP | EX_MEM_SYSC_EXP | EX_MEM_BREAK_EXP | EX_MEM_RI_EXP | EX_MEM_OV_EXP | 
+                        RA_EXP | WA_EXP;
     
+    assign exp_code = EX_MEM_PC_EXP | RA_EXP ? 32'h00000004 :
+                      EX_MEM_RI_EXP ? 32'h0000000a :
+                      EX_MEM_OV_EXP ? 32'h0000000c :
+                      (EX_MEM_BREAK_EXP & status[1] == 0) ? 32'h00000009 :
+                      (EX_MEM_SYSC_EXP & status[1] == 0) ? 32'h00000008 :
+                      WA_EXP ? 32'h00000005 :
+                      0;
+
+    assign bad_addr =  EX_MEM_PC_EXP ? EX_MEM_PC :
+                       RA_EXP | WA_EXP ? MemAddr :
+                       0;
+
+    cp0_reg cp0(
+	.clk(clk),
+    .rst(rst),.we_i(ID_EX_MTCP0),
+    .waddr_i(ID_EX_Rd),
+    .raddr_i(ID_EX_Rt),
+    .data_i(forwardRtData_EX),
+    .int_i(6'b000000),
+    .excepttype_i(exp_code),
+	.current_inst_addr_i(EX_MEM_PC),
+    .is_in_delayslot_i(EX_MEM_isdelayslot),
+	.bad_addr_i(bad_addr),
+    .data_o(cp0out),
+    .epc_o(epc),
+    
+    // do not implement this function
+    .count_o(),.compare_o(),.status_o(status),.cause_o(),.config_o(),.prid_o(),.badvaddr()
+    );
+
+
+
+
     wire MEM_WB_Mem2Reg,MEM_WB_MemWrite;
     wire [31:0] MEM_WB_ALUout,MEM_WB_readdata;
-    
     // MEM/WB register
     flopflip #(2) MEM_WB_controlsignal_register(
     .clk(clk),
-    .rst(rst),
+    .rst(rst | exp_handle),
     .en(1),
     .in({EX_MEM_Mem2Reg,EX_MEM_RegWrite,EX_MEM_MemWrite}),
     .r({MEM_WB_Mem2Reg,MEM_WB_RegWrite,MEM_WB_MemWrite})
