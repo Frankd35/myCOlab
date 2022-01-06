@@ -8,8 +8,15 @@ test/func_test_v0.03/soft/
 test/func_test_v0.03/cpu132_gettrace
 test/func_test_v0.03/soc_axi_func
 test/func_test_v0.03/soc_sram_func/run_vivado/mycpu_prj1/
+test/func_test_v0.03/soc_sram_func/rtl/xilinx_ip/
 test/perf_test_v0.01/
-test/n4ddr/
+test/n4ddr/perf_test_v0.01/
+test/n4ddr/func_test_v0.01/cpu132_gettrace/
+test/n4ddr/func_test_v0.01/project_1.gen/
+test/n4ddr/func_test_v0.01/soft/
+test/n4ddr/func_test_v0.01/soc_sram_func/rtl/xilinx_ip/
+test/n4ddr/func_test_v0.01/soc_sram_func/run_vivado/
+
 
 # ip核生成文件
 mycolab_code/lab4_code_copy/ip/data_ram/data_ram_ooc.xdc

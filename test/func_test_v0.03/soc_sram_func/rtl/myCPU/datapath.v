@@ -252,7 +252,7 @@ module datapath(
     );
     
     
-    wire [31:0] ALUout_EX,forwardRtData_EX;     // EX to EX_MEM
+    wire [31:0] forwardRtData_EX;     // EX to EX_MEM
     wire [4:0] Rd_EX;
     // EX stage
     EX  EXstage(
