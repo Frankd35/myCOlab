@@ -434,17 +434,17 @@ module datapath(
 
     
     assign exp_handle = EX_MEM_PC_EXP | EX_MEM_SYSC_EXP | EX_MEM_BREAK_EXP | EX_MEM_RI_EXP | EX_MEM_OV_EXP | 
-                        RA_EXP | WA_EXP | SW_INT;
+                        RA_EXP | WA_EXP | (SW_INT & status[1] == 0);
     
     assign exp_code = ERET ? 32'h0000000e :                                     // eret has best priority
-                      SW_INT ? 32'h00000000 :
+                      (SW_INT & status[1] == 0) ? 32'h00000001 :
                       EX_MEM_PC_EXP | RA_EXP ? 32'h00000004 :
                       EX_MEM_RI_EXP ? 32'h0000000a :
                       EX_MEM_OV_EXP ? 32'h0000000c :
-                      (EX_MEM_BREAK_EXP & status[1] == 0) ? 32'h00000009 :
-                      (EX_MEM_SYSC_EXP & status[1] == 0) ? 32'h00000008 :
+                      EX_MEM_BREAK_EXP ? 32'h00000009 :
+                      EX_MEM_SYSC_EXP ? 32'h00000008 :
                       WA_EXP ? 32'h00000005 :
-                      32'hffff_ffff;    // default, do not thing here
+                      32'h0;    // default, do not thing here
 
     assign bad_addr =  EX_MEM_PC_EXP ? EX_MEM_PC :
                        RA_EXP | WA_EXP ? MemAddr :
