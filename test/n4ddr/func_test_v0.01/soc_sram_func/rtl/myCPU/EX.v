@@ -46,7 +46,7 @@ module EX(
     wire result_notok,mult_result_ok,div_result_ok;
 
     // i dont know why this shit can't do 32bit arithmetic shift, fk!!
-    // so alu need a shif mount to do arithmetic shift 
+    // so alu need a shif amount to do arithmetic shift 
     assign shamt = ID_EX_ShiftI ? ID_EX_shamt : forwardRsData[4:0];
 
     Mux3 muxRs(
@@ -93,7 +93,7 @@ module EX(
     .in1(ALUin),
     .alucontrol(ID_EX_alucontrol),
     .result_ok(mult_result_ok),
-    .result(mul_result)     // unused，添加hilo
+    .result(mul_result)     
     );
 
     // DU

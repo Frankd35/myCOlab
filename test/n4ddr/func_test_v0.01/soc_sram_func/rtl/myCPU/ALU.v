@@ -33,7 +33,7 @@ module ALU(
     wire [32:0] extra;
 
 
-    // fucking shift, don't how it breaks
+    // shift, don't how it breaks
     // but this can work
     wire[31:0] asr_result,sl_result,sr_result;
     assign sl_result = in1 << shamt;
@@ -42,6 +42,7 @@ module ALU(
 
     // combinational logic
     assign out = 
+        (alucontrol == `EXE_ERET_OP) ? (($signed(in0) > $signed(in1)) ? in0 : in1) : // max
         (alucontrol == `EXE_AND_OP) ? in0 & in1 :     
         (alucontrol == `EXE_OR_OP) ? in0 | in1 :      
         (alucontrol == `EXE_XOR_OP) ? in0 ^ in1 :     
@@ -52,10 +53,6 @@ module ALU(
         (alucontrol == `EXE_LUI_OP) ? {in1[15:0], in0[15:0]} :   // immediate == in1
 
         // in0: reg[rs] / shamt     in1: reg[rt]
-        
-        // (alucontrol == `EXE_SLL_OP) ? in1 << shamt :
-        // (alucontrol == `EXE_SLLV_OP) ? in1 << shamt :
-        
         (alucontrol == `EXE_SLL_OP) ? sl_result :
         (alucontrol == `EXE_SLLV_OP) ? sl_result :
         (alucontrol == `EXE_SRL_OP) ? in1 >> shamt :

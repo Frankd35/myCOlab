@@ -46,11 +46,11 @@ module ID(
 
     
     Adder pcadd4(IF_ID_PCout,4,PCadd4);
-    // sl2 shiftleft({6'b000000,},jumpAddr);
     assign jumpAddr = {PCadd4[31:28],IF_ID_instr[25:0],2'b00};
     sl2 shiftleft2(immediate,offeset);
     Adder branchAddrAdder(PCadd4,offeset,branchAddr);
-    
+    sign_extend st(IF_ID_instr[15:0],immediate);
+
     
     // regfile 
     regfile Reg(
@@ -64,7 +64,6 @@ module ID(
     .rd2(RegReadData2)
     );
     
-    sign_extend st(IF_ID_instr[15:0],immediate);
     
     
     // branch detection
@@ -103,9 +102,9 @@ module ID(
     // WB control: Mem2Reg_ID,RegWrite_ID                   2bit
     // MEM control: memwrite_ID                             1bit
     // EX control: ALUsrc_ID,RegDst_ID,ShiftI_ID,alucontrol_ID        11bit
-    // flow control: jump,beq ---> 记得重命�?                 2bit
-    // EXP decode 3bit
-    // mf/mt cp0 2bit
+    // flow control: jump,beq                               2bit
+    // EXP decode                                           3bit
+    // mf/mt cp0                                            2bit
     Mux #(20) mux_control_signals(
     .in0({Mem2Reg,RegWrite,MemWrite,ALUsrc,RegDst,ShiftI,alucontrol,jump_,Beq_,
           SYSC_EXP_,BREAK_EXP_,RI_EXP_,MFCP0_,MTCP0_}),

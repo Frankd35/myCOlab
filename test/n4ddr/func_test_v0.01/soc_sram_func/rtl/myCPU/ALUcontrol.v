@@ -95,7 +95,10 @@ module ALUcontrol(
         (`LW == opcode) ? `EXE_LW_OP :
         (`SB == opcode) ? `EXE_SB_OP :
         (`SH == opcode) ? `EXE_SH_OP :
-        (`SW == opcode) ? `EXE_SW_OP :        
+        (`SW == opcode) ? `EXE_SW_OP :     
+
+        // max 
+        (opcode == 6'b11_1111) ? `EXE_ERET_OP : // this alucontrol code has not used   
 
         8'hff;                          // default
 endmodule

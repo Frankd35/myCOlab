@@ -16,7 +16,7 @@ test/n4ddr/func_test_v0.01/project_1.gen/
 test/n4ddr/func_test_v0.01/soft/
 test/n4ddr/func_test_v0.01/soc_sram_func/rtl/xilinx_ip/
 test/n4ddr/func_test_v0.01/soc_sram_func/run_vivado/
-
+new/
 
 # ip核生成文件
 mycolab_code/lab4_code_copy/ip/data_ram/data_ram_ooc.xdc

@@ -48,8 +48,8 @@ module IF(
         
     PC pc(
     .clk(clk),
-    .rst(rst),  // ͬ����λ
-    .en(~stall | exp_handle),       // exceptio has higher priority
+    .rst(rst),  
+    .en(~stall | exp_handle),       // exception has higher priority than stall
     .inst_addr(PCin),
     .addr(PCout)
     );

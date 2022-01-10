@@ -65,6 +65,7 @@ module MainDecoder(
     ((opcode[5:2] == 4'b0001) | (opcode == 6'b000001)) ? 9'b1001_0000_0 : // branch
     (opcode == 5'b00_0010) ? 9'b1000_0001_0 : // j
     (opcode == 5'b00_0011) ? 9'b1000_0011_0 : // jal
+    (opcode == 6'b11_1111) ? 9'b1000_0010_0 : // new instruction: max
     9'b0000_0000_1;                                          // default
     
     // unused signal

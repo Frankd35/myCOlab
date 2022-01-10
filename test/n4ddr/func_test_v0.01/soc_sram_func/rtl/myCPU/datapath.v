@@ -52,19 +52,6 @@ module datapath(
     instdec dec_MEM(EX_MEM_instr,MEM_instr_);
     instdec dec_WB(MEM_WB_instr,WB_instr_);
 
-    // wire statement
-    wire stall_IF,stall_ID,stall_EX,Beq,branch,jump,ID_EX_Beq,ID_EX_jump,branch_tacken,ALUoutEONE,EX_MEM_branch_tacken; // control signals
-    wire [31:0] PCadd4,jumpAddr,branchAddr,ID_EX_jumpAddr,ID_EX_branchAddr,PCout;   // between IF ID
-    wire [31:0] ALUout_EX,EX_MEM_ALUout,WBvalue,MEM_WB_writedata,jumpAddr_EX;  // forward datas
-    wire [3:0] forwardSignalID,forwardSignalEX;
-    wire Gforward;
-    wire [4:0] MEM_WB_Rd;   // WB 
-    wire MEM_WB_RegWrite;   // WB
-
-
-    assign branch = ID_EX_Beq & ALUoutEONE;
-    assign branch_tacken = branch | ID_EX_jump;
-
     // exception and interrupt
     wire SYSC_EXP,BREAK_EXP,RI_EXP,PC_EXP,OV_EXP,HW_INT,RA_EXP,WA_EXP,exp_handle;
     wire IF_ID_PC_EXP;                                                                      // IF_ID
@@ -74,6 +61,19 @@ module datapath(
     wire ERET,ID_EX_ERET;
     wire ID_EX_isdelayslot,EX_MEM_isdelayslot;
     wire [31:0] bad_addr,epc;
+    
+    // wire statement
+    wire stall_IF,stall_ID,stall_EX,Beq,branch,jump,ID_EX_Beq,ID_EX_jump,branch_tacken,ALUoutEONE,EX_MEM_branch_tacken; // control signals
+    wire [31:0] PCadd4,jumpAddr,branchAddr,ID_EX_jumpAddr,ID_EX_branchAddr,PCout;   // between IF ID
+    wire [31:0] ALUout_EX,EX_MEM_ALUout,WBvalue,MEM_WB_writedata,jumpAddr_EX;  // forward datas
+    wire [3:0] forwardSignalID,forwardSignalEX;
+    wire Gforward;
+    wire [4:0] MEM_WB_Rd;   // WB 
+    wire MEM_WB_RegWrite;   // WB
+
+    // branch & control signal
+    assign branch = ID_EX_Beq & ALUoutEONE;
+    assign branch_tacken = branch | ID_EX_jump;
 
     // IF stage
     IF IFstage(
